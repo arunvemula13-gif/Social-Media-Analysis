@@ -1,0 +1,26 @@
+{
+    "folders": [
+        {
+            "name": "🌐 1. SPEDO Full Stack Root",
+            "path": "."
+        },
+        {
+            "name": "🎨 2. Frontend (HTML, CSS, JS)",
+            "path": "./frontend"
+        },
+        {
+            "name": "☕ 3. Backend (Java Spring Boot)",
+            "path": "./src/main/java/com/spedo/analytics"
+        },
+        {
+            "name": "🗄️ 4. Resources & Database SQL",
+            "path": "./src/main/resources"
+        }
+    ],
+    "settings": {
+        "explorer.compactFolders": false,
+        "editor.tabSize": 4,
+        "liveServer.settings.multiRootWorkspaceName": "🎨 2. Frontend (HTML, CSS, JS)",
+        "java.compile.nullAnalysis.mode": "automatic"
+    }
+}

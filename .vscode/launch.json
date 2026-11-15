@@ -1,0 +1,12 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "🚀 Launch SPEDO Application",
+            "request": "launch",
+            "mainClass": "com.spedo.analytics.SpedoAnalyticsApplication",
+            "projectName": "spedo-analytics"
+        }
+    ]
+}

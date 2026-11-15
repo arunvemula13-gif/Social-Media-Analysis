@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Social Media Accounts — SPEDO</title>
+    <link rel="stylesheet" href="css/styles.css?v=2">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <div class="app-layout">
+        <aside class="app-sidebar" id="sidebar"></aside>
+
+        <div class="app-main">
+            <header class="app-header" id="header"></header>
+
+            <main class="page-content">
+                <div class="page-title-bar">
+                    <div class="page-heading">
+                        <h1>Connected Social Accounts</h1>
+                        <p>Manage and synchronize multi-platform channel metrics, permissions, and adapters.</p>
+                    </div>
+
+                    <button class="btn btn-primary" onclick="openConnectModal()">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                        <span>Connect New Account</span>
+                    </button>
+                </div>
+
+                <!-- API Status Info Box -->
+                <div class="demo-banner">
+                    <div class="demo-banner-left">
+                        <span class="demo-badge">Live YouTube Data</span>
+                        <span>YouTube channel cards show live public subscribers, lifetime views, and video count. Other platforms require their own official API credentials.</span>
+                    </div>
+                </div>
+
+                <!-- Accounts Grid -->
+                <div id="accountsGrid" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap:24px; margin-top:20px;">
+                    <div style="color:#94a3b8; padding:40px; text-align:center; grid-column:1/-1;">Loading connected channels...</div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Connect Account Modal -->
+    <div class="modal-overlay" id="connectModal">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3 class="modal-title">Connect Social Account</h3>
+                <button class="modal-close" onclick="closeConnectModal()">×</button>
+            </div>
+            <form id="connectForm" onsubmit="handleConnectSubmit(event)">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label class="form-label" for="connectPlatform">Network Platform</label>
+                        <select id="connectPlatform" class="form-control" required onchange="handlePlatformChange(this.value)">
+                            <option value="YOUTUBE" selected>YouTube Channel (Real API Sync Active)</option>
+                            <option value="INSTAGRAM">Instagram</option>
+                            <option value="FACEBOOK">Facebook Page</option>
+                            <option value="LINKEDIN">LinkedIn Company Page</option>
+                            <option value="TWITTER">X (Twitter)</option>
+                        </select>
+                    </div>
+
+                    <!-- YouTube Live Sync Active Notice -->
+                    <div id="youtubeInfoBanner" style="background:#fef2f2; border:1px solid #fecaca; border-radius:10px; padding:14px; margin-bottom:16px;">
+                        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;">
+                            <div style="display:flex; align-items:center; gap:8px; color:#dc2626; font-weight:700; font-size:13px;">
+                                <span style="font-size:16px;">▶️</span>
+                                <span>YouTube Data API v3 Active</span>
+                            </div>
+                            <span style="font-size:11px; background:#dcfce7; color:#166534; font-weight:700; padding:2px 8px; border-radius:12px;">100% Real Data</span>
+                        </div>
+                        <p style="font-size:12px; color:#475569; margin:0 0 6px 0; line-height:1.4;">
+                            Simply enter your <strong>@handle</strong> (e.g. <code>@way4news999</code> or <code>@Google</code>), <strong>Channel ID</strong> (e.g. <code>UCbtRM4Y4n7Id6trpT38zJ3g</code>), or <strong>YouTube URL</strong>.
+                        </p>
+                        <div style="font-size:11px; color:#16a34a; font-weight:600;">
+                            ✓ Subscribers, lifetime views, video uploads, and comment sentiment sync automatically!
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="connectAccountName">Account / Display Name (Optional)</label>
+                        <input type="text" id="connectAccountName" class="form-control" placeholder="e.g. Way4News (auto-fills from YouTube if blank)">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="connectHandle">Handle / Username or Profile Link *</label>
+                        <input type="text" id="connectHandle" class="form-control" placeholder="e.g. @way4news999 or UCbtRM4Y4n7Id6trpT38zJ3g" required oninput="handleHandleInput(this.value)">
+                        <small id="handleHelpText" style="color:#64748b; font-size:11px; display:block; margin-top:4px;">Enter an @handle, channel ID (UC...), or youtube.com URL.</small>
+                    </div>
+
+                    <div id="manualFollowersGroup" style="display:none; grid-template-columns: 1fr 1fr; gap:12px;">
+                        <div class="form-group">
+                            <label class="form-label" for="connectFollowers">Current Followers</label>
+                            <input type="number" id="connectFollowers" class="form-control" placeholder="e.g. 5200" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="connectFollowing">Current Following</label>
+                            <input type="number" id="connectFollowing" class="form-control" placeholder="e.g. 350" min="0">
+                        </div>
+                    </div>
+
+                    <div class="form-group" id="profileImageGroup">
+                        <label class="form-label" for="connectAvatar">Profile Picture URL (Optional)</label>
+                        <input type="url" id="connectAvatar" class="form-control" placeholder="Leave blank to use official YouTube avatar">
+                    </div>
+
+                    <div class="form-group" id="metaTokenGroup" style="display:none;">
+                        <label class="form-label" for="connectAccessToken">Meta Graph API Access Token (Optional)</label>
+                        <input type="password" id="connectAccessToken" class="form-control" placeholder="EAA... (User or Page Token for live Meta Graph sync)">
+                        <small style="color:#64748b; font-size:11px; display:block; margin-top:4px;">Required by Meta for live official API synchronization. If omitted, your real baseline followers are preserved and tracked securely.</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline" onclick="closeConnectModal()">Cancel</button>
+                    <button type="submit" id="saveConnectBtn" class="btn btn-primary">Connect Account</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/navbar.js?v=2"></script>
+    <script src="js/social-accounts.js"></script>
+</body>
+</html>

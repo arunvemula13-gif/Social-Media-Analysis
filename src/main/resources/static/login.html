@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In — SPEDO Analytics</title>
+    <link rel="stylesheet" href="css/styles.css?v=5">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <div class="auth-wrapper">
+        <div class="auth-box">
+            <div class="auth-header">
+                <a href="index.html" class="brand-logo">
+                    <div class="brand-icon">S</div>
+                    <span style="color:var(--text-dark);">SPEDO</span>
+                </a>
+                <h2>Sign In to SPEDO</h2>
+                <p>Enter your credentials to access your intelligence dashboard</p>
+            </div>
+
+            <div id="authAlert" style="display:none; padding:12px 14px; border-radius:8px; font-size:13px; margin-bottom:16px;"></div>
+
+            <form id="loginForm" onsubmit="handleLoginSubmit(event)">
+                <div class="form-group">
+                    <label class="form-label" for="email">Work Email Address</label>
+                    <input type="email" id="email" class="form-control" placeholder="you@company.com" required autocomplete="email" autofocus>
+                </div>
+
+                <div class="form-group">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                        <label class="form-label" for="password" style="margin-bottom:0;">Password</label>
+                        <a href="#" style="font-size:12px; color:var(--primary-blue); text-decoration:none;" onclick="togglePasswordVisibility(); return false;" id="togglePwdLink">Show Password</a>
+                    </div>
+                    <input type="password" id="password" class="form-control" placeholder="••••••••" required autocomplete="current-password">
+                </div>
+
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; font-size:13px;">
+                    <label style="display:flex; align-items:center; gap:8px; cursor:pointer; color:var(--text-secondary); user-select:none;">
+                        <input type="checkbox" id="rememberMe" style="accent-color:var(--primary-blue); cursor:pointer;">
+                        <span>Remember me</span>
+                    </label>
+                    <a href="#" onclick="handleForgotPassword(event)" style="color:var(--primary-blue); text-decoration:none; font-weight:600;">Forgot password?</a>
+                </div>
+
+                <button type="submit" id="submitBtn" class="btn btn-primary" style="width:100%;">
+                    <span>Sign In to Dashboard</span>
+                </button>
+            </form>
+
+            <div style="margin-top:24px; text-align:center; font-size:13px; color:var(--text-secondary);">
+                Don't have an account? <a href="register.html" style="font-weight:600; color:var(--primary-blue);">Start 14-day free trial</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Password Recovery 2-Step Interactive Modal -->
+    <div class="modal-overlay" id="forgotModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); backdrop-filter:blur(4px); z-index:1000; align-items:center; justify-content:center; padding:20px;">
+        <div class="modal-container" style="background:var(--bg-card, #ffffff); border:1px solid var(--border-color, #e2e8f0); border-radius:14px; max-width:440px; width:100%; padding:26px; box-shadow:0 20px 30px -5px rgba(0,0,0,0.3);">
+            
+            <!-- Step 1: Request Code / Token -->
+            <div id="forgotStep1">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                    <h3 style="font-size:18px; font-weight:800; color:var(--text-dark, #0f172a); margin:0;">Forgot Password</h3>
+                    <button type="button" onclick="closeForgotModal()" style="background:none; border:none; color:#94a3b8; font-size:20px; cursor:pointer; padding:0; line-height:1;">✕</button>
+                </div>
+                <p style="font-size:13px; color:var(--text-secondary, #64748b); line-height:1.5; margin:0 0 16px 0;">
+                    Enter your work email address below. We'll send you a 6-digit verification code to reset your account password.
+                </p>
+
+                <div id="forgotStep1Alert" style="display:none; padding:10px 14px; border-radius:8px; font-size:12.5px; margin-bottom:14px;"></div>
+
+                <div class="form-group" style="margin-bottom:18px;">
+                    <label class="form-label" for="resetEmail" style="font-size:12px; font-weight:600;">Work Email Address</label>
+                    <input type="email" id="resetEmail" class="form-control" placeholder="you@company.com" required>
+                </div>
+
+                <div style="display:flex; justify-content:flex-end; gap:8px;">
+                    <button type="button" class="btn btn-outline btn-sm" onclick="closeForgotModal()">Cancel</button>
+                    <button type="button" class="btn btn-primary btn-sm" id="sendResetBtn" onclick="requestPasswordResetCode()">Send Verification Code</button>
+                </div>
+            </div>
+
+            <!-- Step 2: Enter Code & New Password -->
+            <div id="forgotStep2" style="display:none;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                    <h3 style="font-size:18px; font-weight:800; color:var(--text-dark, #0f172a); margin:0;">Reset Your Password</h3>
+                    <button type="button" onclick="closeForgotModal()" style="background:none; border:none; color:#94a3b8; font-size:20px; cursor:pointer; padding:0; line-height:1;">✕</button>
+                </div>
+                <p style="font-size:13px; color:var(--text-secondary, #64748b); line-height:1.5; margin:0 0 14px 0;">
+                    Verification code dispatched to <strong id="step2EmailDisplay" style="color:var(--primary-blue, #2563eb);"></strong>. Enter the code and your new password below:
+                </p>
+
+                <div id="forgotStep2Alert" style="display:none; padding:10px 14px; border-radius:8px; font-size:12.5px; margin-bottom:14px;"></div>
+
+                <div class="form-group" style="margin-bottom:14px;">
+                    <label class="form-label" for="resetTokenInput" style="font-size:12px; font-weight:600;">6-Digit Verification Code</label>
+                    <input type="text" id="resetTokenInput" class="form-control" placeholder="e.g. 123456" maxlength="20" style="letter-spacing:2px; font-weight:700;">
+                </div>
+
+                <div class="form-group" style="margin-bottom:14px;">
+                    <label class="form-label" for="resetNewPassword" style="font-size:12px; font-weight:600;">New Password (min 6 characters)</label>
+                    <input type="password" id="resetNewPassword" class="form-control" placeholder="••••••••" required>
+                </div>
+
+                <div class="form-group" style="margin-bottom:18px;">
+                    <label class="form-label" for="resetConfirmPassword" style="font-size:12px; font-weight:600;">Confirm New Password</label>
+                    <input type="password" id="resetConfirmPassword" class="form-control" placeholder="••••••••" required>
+                </div>
+
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <button type="button" class="btn btn-outline btn-sm" onclick="switchToStep1()">← Change Email</button>
+                    <button type="button" class="btn btn-primary btn-sm" id="completeResetBtn" onclick="submitPasswordReset()">Save New Password</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script>
+        // Check saved theme preference
+        if (localStorage.getItem('spedo_theme') === 'dark') {
+            document.body.classList.add('dark-mode');
+        }
+
+        // Clean any stale session on login page load
+        ApiClient.removeToken();
+
+        // Check if user previously saved their email
+        const savedEmail = localStorage.getItem('spedo_remembered_email');
+        if (savedEmail) {
+            document.getElementById('email').value = savedEmail;
+            document.getElementById('rememberMe').checked = true;
+        }
+
+        function togglePasswordVisibility() {
+            const pwdInput = document.getElementById('password');
+            const link = document.getElementById('togglePwdLink');
+            if (pwdInput.type === 'password') {
+                pwdInput.type = 'text';
+                link.innerText = 'Hide Password';
+            } else {
+                pwdInput.type = 'password';
+                link.innerText = 'Show Password';
+            }
+        }
+
+        function handleForgotPassword(e) {
+            if (e) e.preventDefault();
+            const emailVal = document.getElementById('email').value.trim();
+            if (emailVal) {
+                document.getElementById('resetEmail').value = emailVal;
+            }
+            switchToStep1();
+            const modal = document.getElementById('forgotModal');
+            modal.style.display = 'flex';
+        }
+
+        function closeForgotModal() {
+            document.getElementById('forgotModal').style.display = 'none';
+        }
+
+        function switchToStep1() {
+            document.getElementById('forgotStep1').style.display = 'block';
+            document.getElementById('forgotStep2').style.display = 'none';
+            document.getElementById('forgotStep1Alert').style.display = 'none';
+            document.getElementById('forgotStep2Alert').style.display = 'none';
+        }
+
+        async function requestPasswordResetCode() {
+            const email = document.getElementById('resetEmail').value.trim();
+            const alertEl = document.getElementById('forgotStep1Alert');
+            const btn = document.getElementById('sendResetBtn');
+            alertEl.style.display = 'none';
+
+            if (!email) {
+                alertEl.style.display = 'block';
+                alertEl.style.background = '#fef2f2';
+                alertEl.style.color = '#991b1b';
+                alertEl.style.border = '1px solid #f87171';
+                alertEl.innerText = 'Please enter your work email address.';
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerText = 'Sending Code...';
+
+            try {
+                const res = await Auth.forgotPassword(email);
+                btn.disabled = false;
+                btn.innerText = 'Send Verification Code';
+
+                document.getElementById('step2EmailDisplay').textContent = email;
+                
+                // If a reset code was returned (dev/preview convenience), prefill it
+                if (res.data && res.data.resetCode) {
+                    document.getElementById('resetTokenInput').value = res.data.resetCode;
+                }
+
+                // Transition to Step 2
+                document.getElementById('forgotStep1').style.display = 'none';
+                document.getElementById('forgotStep2').style.display = 'block';
+                const step2Alert = document.getElementById('forgotStep2Alert');
+                step2Alert.style.display = 'block';
+                step2Alert.style.background = '#f0fdf4';
+                step2Alert.style.color = '#166534';
+                step2Alert.style.border = '1px solid #86efac';
+                
+                if (res.data && res.data.resetCode) {
+                    step2Alert.innerHTML = `Verification code: <strong>${res.data.resetCode}</strong>. (Also dispatched to your inbox).`;
+                } else {
+                    step2Alert.innerText = `Instructions and code dispatched to ${email}. Check your inbox!`;
+                }
+            } catch (err) {
+                btn.disabled = false;
+                btn.innerText = 'Send Verification Code';
+                alertEl.style.display = 'block';
+                alertEl.style.background = '#fef2f2';
+                alertEl.style.color = '#991b1b';
+                alertEl.style.border = '1px solid #f87171';
+                alertEl.innerText = err.message || 'Failed to dispatch reset code. Please try again.';
+            }
+        }
+
+        async function submitPasswordReset() {
+            const email = document.getElementById('step2EmailDisplay').textContent.trim() || document.getElementById('resetEmail').value.trim();
+            const token = document.getElementById('resetTokenInput').value.trim();
+            const newPassword = document.getElementById('resetNewPassword').value;
+            const confirmPassword = document.getElementById('resetConfirmPassword').value;
+            const alertEl = document.getElementById('forgotStep2Alert');
+            const btn = document.getElementById('completeResetBtn');
+            alertEl.style.display = 'none';
+
+            if (!token) {
+                alertEl.style.display = 'block';
+                alertEl.style.background = '#fef2f2';
+                alertEl.style.color = '#991b1b';
+                alertEl.style.border = '1px solid #f87171';
+                alertEl.innerText = 'Please enter the 6-digit verification code.';
+                return;
+            }
+
+            if (!newPassword || newPassword.length < 6) {
+                alertEl.style.display = 'block';
+                alertEl.style.background = '#fef2f2';
+                alertEl.style.color = '#991b1b';
+                alertEl.style.border = '1px solid #f87171';
+                alertEl.innerText = 'New password must be at least 6 characters.';
+                return;
+            }
+
+            if (newPassword !== confirmPassword) {
+                alertEl.style.display = 'block';
+                alertEl.style.background = '#fef2f2';
+                alertEl.style.color = '#991b1b';
+                alertEl.style.border = '1px solid #f87171';
+                alertEl.innerText = 'Passwords do not match. Please verify.';
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerText = 'Saving Password...';
+
+            try {
+                await Auth.resetPassword(email, token, newPassword);
+                btn.disabled = false;
+                btn.innerText = 'Save New Password';
+                closeForgotModal();
+
+                // Show success on main login form
+                document.getElementById('email').value = email;
+                document.getElementById('password').value = '';
+                const mainAlert = document.getElementById('authAlert');
+                mainAlert.style.display = 'block';
+                mainAlert.style.background = '#f0fdf4';
+                mainAlert.style.color = '#166534';
+                mainAlert.style.border = '1px solid #86efac';
+                mainAlert.innerHTML = '<strong>Password reset successful!</strong> You can now sign in with your new password.';
+                showToast('Password updated! Please log in.', 'success', 5000);
+            } catch (err) {
+                btn.disabled = false;
+                btn.innerText = 'Save New Password';
+                alertEl.style.display = 'block';
+                alertEl.style.background = '#fef2f2';
+                alertEl.style.color = '#991b1b';
+                alertEl.style.border = '1px solid #f87171';
+                alertEl.innerText = err.message || 'Password reset failed. Please check the code and try again.';
+            }
+        }
+
+        async function handleLoginSubmit(e) {
+            if (e) e.preventDefault();
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            const rememberMe = document.getElementById('rememberMe').checked;
+
+            if (rememberMe) {
+                localStorage.setItem('spedo_remembered_email', email);
+            } else {
+                localStorage.removeItem('spedo_remembered_email');
+            }
+
+            await executeLogin(email, password);
+        }
+
+        async function executeLogin(email, password) {
+            const alertBox = document.getElementById('authAlert');
+            alertBox.style.display = 'none';
+
+            if (!email || !password) {
+                alertBox.style.display = 'block';
+                alertBox.style.background = '#fef2f2';
+                alertBox.style.color = '#991b1b';
+                alertBox.style.border = '1px solid #f87171';
+                alertBox.innerText = 'Please enter both email and password.';
+                return;
+            }
+
+            const btn = document.getElementById('submitBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<span>Signing in to workspace...</span>';
+
+            try {
+                await Auth.login(email, password);
+                alertBox.style.display = 'block';
+                alertBox.style.background = '#f0fdf4';
+                alertBox.style.color = '#166534';
+                alertBox.style.border = '1px solid #86efac';
+                alertBox.innerText = 'Sign in successful! Redirecting to dashboard...';
+            } catch (err) {
+                btn.disabled = false;
+                btn.innerHTML = '<span>Sign In to Dashboard</span>';
+                alertBox.style.display = 'block';
+                alertBox.style.background = '#fef2f2';
+                alertBox.style.color = '#991b1b';
+                alertBox.style.border = '1px solid #f87171';
+                alertBox.innerText = err.message || 'Login failed. Please verify credentials.';
+            }
+        }
+    </script>
+</body>
+</html>

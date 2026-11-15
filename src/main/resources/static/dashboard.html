@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SPEDO &mdash; Social Media Performance Dashboard</title>
+    <link rel="stylesheet" href="css/styles.css?v=4">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- Chart.js for High-End Visualizations -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+</head>
+<body class="dark-mode">
+
+    <div class="app-layout">
+        <!-- Reusable Dark Navy Sidebar -->
+        <aside class="app-sidebar" id="sidebar"></aside>
+
+        <!-- Main Workspace Area -->
+        <div class="app-main">
+            <!-- Top App Header -->
+            <header class="app-header" id="header" style="display:flex; align-items:center; justify-content:space-between; padding:0 28px;">
+                <div style="display:flex; align-items:center; gap:20px;">
+                    <h1 style="font-size:22px; font-weight:800; color:var(--text-dark); margin:0; letter-spacing:-0.5px;">Performance</h1>
+                    <div class="header-search" style="width:260px;">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                        <input type="text" placeholder="Search" id="globalSearchInput" onkeydown="handleGlobalSearch(event)">
+                    </div>
+                </div>
+
+                <div class="header-actions" style="display:flex; align-items:center; gap:12px;">
+                    <!-- Date Selector Badge -->
+                    <div class="header-date-badge" id="headerDateRangeBadge" onclick="cycleDateRange()" title="Click to change date range">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                        <span id="headerDateText">Dec 25, 2026</span>
+                    </div>
+
+                    <!-- Platform Selector Dropdown -->
+                    <select id="headerPlatformSelect" class="header-platform-select" onchange="handlePlatformChange(this.value)">
+                        <option value="ALL" selected>ðŸŒ All Networks</option>
+                        <option value="YOUTUBE">â–¶ï¸ YouTube</option>
+                        <option value="INSTAGRAM">ðŸ“¸ Instagram</option>
+                        <option value="TWITTER">ð• X (Twitter)</option>
+                        <option value="LINKEDIN">ðŸ’¼ LinkedIn</option>
+                        <option value="FACEBOOK">ðŸ‘¥ Facebook</option>
+                    </select>
+
+                    <!-- Notifications Bell Badge -->
+                    <a href="notifications.html" class="icon-btn" title="Notifications">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+                        <span class="badge-count" id="notificationBadge" style="display:none;">0</span>
+                    </a>
+
+                    <!-- User Avatar -->
+                    <div style="position:relative; cursor:pointer;" onclick="window.location.href='settings.html'">
+                        <div class="user-avatar" id="headerAvatar" style="background:#0f172a; border:2px solid #00f2fe; color:#00f2fe; width:34px; height:34px;">AV</div>
+                        <span style="position:absolute; bottom:0; right:0; width:10px; height:10px; border-radius:50%; background:#10b981; border:2px solid var(--bg-card);"></span>
+                    </div>
+                </div>
+            </header>
+
+            <main class="page-content" style="padding:24px 28px 48px;">
+
+                <!-- Studio Quick Action Bar -->
+                <div class="quick-actions-bar" style="margin-bottom:20px;">
+                    <a href="giveaway.html" class="quick-action-card">
+                        <div class="quick-action-icon" style="background:rgba(0,242,254,0.12); color:#00f2fe;">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 12 20 22 4 22 4 12"></polyline><rect x="2" y="7" width="20" height="5"></rect><line x1="12" y1="22" x2="12" y2="7"></line><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"></path><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"></path></svg>
+                        </div>
+                        <div class="quick-action-body">
+                            <div class="quick-action-title">Giveaway Winner</div>
+                            <div class="quick-action-desc">Draw with SecureRandom</div>
+                        </div>
+                    </a>
+
+                    <a href="competitors.html" class="quick-action-card">
+                        <div class="quick-action-icon" style="background:rgba(192,132,252,0.12); color:#c084fc;">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
+                        </div>
+                        <div class="quick-action-body">
+                            <div class="quick-action-title">Competitor Intel</div>
+                            <div class="quick-action-desc">Audit rival accounts</div>
+                        </div>
+                    </a>
+
+                    <a href="reports.html" class="quick-action-card">
+                        <div class="quick-action-icon" style="background:rgba(16,185,129,0.12); color:#10b981;">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+                        </div>
+                        <div class="quick-action-body">
+                            <div class="quick-action-title">Executive Reports</div>
+                            <div class="quick-action-desc">Export HTML & CSV</div>
+                        </div>
+                    </a>
+
+                    <a href="omnichannel.html" class="quick-action-card">
+                        <div class="quick-action-icon" style="background:rgba(255,255,255,0.06); color:#cbd5e1;">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+                        </div>
+                        <div class="quick-action-body">
+                            <div class="quick-action-title">Omnichannel Hub</div>
+                            <div class="quick-action-desc">Unified relational data</div>
+                        </div>
+                    </a>
+                </div>
+
+                <!-- Onboarding Banner for accounts without connected social channels -->
+                <div id="noAccountsBanner" style="display:none; background:linear-gradient(135deg, rgba(0,242,254,0.08) 0%, rgba(67,97,238,0.08) 100%); border:1px solid rgba(0,242,254,0.25); border-radius:12px; padding:16px 20px; margin-bottom:20px; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;">
+                    <div style="display:flex; align-items:center; gap:14px;">
+                        <div style="width:40px; height:40px; border-radius:10px; background:rgba(0,242,254,0.15); color:#00f2fe; display:flex; align-items:center; justify-content:center; font-size:20px; flex-shrink:0;">ðŸš€</div>
+                        <div>
+                            <div style="font-weight:700; font-size:14px; color:var(--text-dark, #0f172a);">No Social Media Accounts Connected</div>
+                            <div style="font-size:12px; color:var(--text-secondary, #64748b); margin-top:2px;">Connect your YouTube, Instagram, Facebook, or X profiles to start tracking real-time followers, impressions, and engagement metrics.</div>
+                        </div>
+                    </div>
+                    <a href="social-accounts.html" class="btn btn-primary btn-sm" style="font-weight:700; font-size:12.5px; padding:8px 18px; text-decoration:none;">+ Connect Account</a>
+                </div>
+
+                <!-- 5-KPI Strip Metrics (Followers, Likes, Comments, Shares, Mentions) -->
+                <div class="kpi-strip-grid">
+                    <!-- Followers -->
+                    <div class="kpi-strip-card">
+                        <div class="kpi-strip-head">
+                            <span class="kpi-strip-val" id="kpiFollowers">0</span>
+                            <span class="kpi-strip-icon" style="background:rgba(0,242,254,0.12); color:#00f2fe;">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                            </span>
+                        </div>
+                        <span class="kpi-strip-lbl" id="kpiFollowersLbl">Followers</span>
+                    </div>
+
+                    <!-- Likes -->
+                    <div class="kpi-strip-card">
+                        <div class="kpi-strip-head">
+                            <span class="kpi-strip-val" id="kpiLikes">0</span>
+                            <span class="kpi-strip-icon" style="background:rgba(244,63,94,0.12); color:#f43f5e;">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                            </span>
+                        </div>
+                        <span class="kpi-strip-lbl" id="kpiLikesLbl">Likes</span>
+                    </div>
+
+                    <!-- Comments -->
+                    <div class="kpi-strip-card">
+                        <div class="kpi-strip-head">
+                            <span class="kpi-strip-val" id="kpiComments">0</span>
+                            <span class="kpi-strip-icon" style="background:rgba(192,132,252,0.12); color:#c084fc;">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+                            </span>
+                        </div>
+                        <span class="kpi-strip-lbl" id="kpiCommentsLbl">Comments</span>
+                    </div>
+
+                    <!-- Shares -->
+                    <div class="kpi-strip-card">
+                        <div class="kpi-strip-head">
+                            <span class="kpi-strip-val" id="kpiShares">0</span>
+                            <span class="kpi-strip-icon" style="background:rgba(56,189,248,0.12); color:#38bdf8;">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+                            </span>
+                        </div>
+                        <span class="kpi-strip-lbl" id="kpiSharesLbl">Reach / Views</span>
+                    </div>
+
+                    <!-- Mentions -->
+                    <div class="kpi-strip-card">
+                        <div class="kpi-strip-head">
+                            <span class="kpi-strip-val" id="kpiMentions">0</span>
+                            <span class="kpi-strip-icon" style="background:rgba(16,185,129,0.12); color:#10b981;">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"></circle><path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-3.92 7.94"></path></svg>
+                            </span>
+                        </div>
+                        <span class="kpi-strip-lbl" id="kpiMentionsLbl">Engagements</span>
+                    </div>
+                </div>
+
+                <!-- TIER 1: Reach and Impressions (Line) & Top Contents (Bar) -->
+                <div class="grid-performance-top">
+                    <!-- Reach and Impressions Wave Chart -->
+                    <div class="card">
+                        <div class="chart-header" style="margin-bottom:12px;">
+                            <div class="chart-title">Reach and Impressions</div>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--text-muted); cursor:pointer;"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>
+                        </div>
+                        <div class="chart-canvas-container" style="height:250px;">
+                            <canvas id="reachImpressionsChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Top Contents Media Breakdown Bar Chart -->
+                    <div class="card">
+                        <div class="chart-header" style="margin-bottom:12px;">
+                            <div class="chart-title">Top Contents</div>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--text-muted); cursor:pointer;"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>
+                        </div>
+                        <div class="chart-canvas-container" style="height:250px;">
+                            <canvas id="topContentsChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TIER 2: Age Distribution (Donut) + Sentiment Tracking (Radials) + Map Distribution -->
+                <div class="grid-performance-mid">
+                    <!-- Age Distribution Donut -->
+                    <div class="card" style="display:flex; flex-direction:column; justify-content:space-between;">
+                        <div class="chart-header" style="margin-bottom:8px;">
+                            <div class="chart-title">Age Distribution</div>
+                        </div>
+                        <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; height:180px;">
+                            <div style="position:relative; width:130px; height:130px; flex-shrink:0;">
+                                <canvas id="ageDistributionChart"></canvas>
+                            </div>
+                            <div style="display:flex; flex-direction:column; gap:6px; font-size:11px; flex:1;" id="ageLegendList">
+                                <div style="display:flex; align-items:center; justify-content:space-between;">
+                                    <span style="display:flex; align-items:center; gap:6px;"><span style="width:8px; height:8px; border-radius:50%; background:#f43f5e;"></span>14-18</span>
+                                    <span style="font-weight:600; color:var(--text-secondary);" id="ageVal1">0%</span>
+                                </div>
+                                <div style="display:flex; align-items:center; justify-content:space-between;">
+                                    <span style="display:flex; align-items:center; gap:6px;"><span style="width:8px; height:8px; border-radius:50%; background:#8b5cf6;"></span>18-25</span>
+                                    <span style="font-weight:600; color:var(--text-secondary);" id="ageVal2">0%</span>
+                                </div>
+                                <div style="display:flex; align-items:center; justify-content:space-between;">
+                                    <span style="display:flex; align-items:center; gap:6px;"><span style="width:8px; height:8px; border-radius:50%; background:#3b82f6;"></span>25-30</span>
+                                    <span style="font-weight:600; color:var(--text-secondary);" id="ageVal3">0%</span>
+                                </div>
+                                <div style="display:flex; align-items:center; justify-content:space-between;">
+                                    <span style="display:flex; align-items:center; gap:6px;"><span style="width:8px; height:8px; border-radius:50%; background:#f59e0b;"></span>30-35</span>
+                                    <span style="font-weight:600; color:var(--text-secondary);" id="ageVal4">0%</span>
+                                </div>
+                                <div style="display:flex; align-items:center; justify-content:space-between;">
+                                    <span style="display:flex; align-items:center; gap:6px;"><span style="width:8px; height:8px; border-radius:50%; background:#00f2fe;"></span>35-45</span>
+                                    <span style="font-weight:600; color:var(--text-secondary);" id="ageVal5">0%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sentiment Tracking Circular Rings -->
+                    <div class="card" style="display:flex; flex-direction:column; justify-content:space-between;">
+                        <div class="chart-header" style="margin-bottom:8px;">
+                            <div class="chart-title">Sentiment Tracking</div>
+                        </div>
+                        <div class="sentiment-radials-row">
+                            <!-- Positive -->
+                            <div class="sentiment-radial-item">
+                                <div class="radial-circle-wrap">
+                                    <svg viewBox="0 0 36 36" style="width:100%; height:100%; transform:rotate(-90deg);">
+                                        <circle cx="18" cy="18" r="14.5" fill="none" stroke="#232838" stroke-width="3.5"></circle>
+                                        <circle id="radialCirclePos" cx="18" cy="18" r="14.5" fill="none" stroke="#00f2fe" stroke-width="3.5" stroke-dasharray="91" stroke-dashoffset="91" stroke-linecap="round" style="transition:stroke-dashoffset 0.8s ease; filter:drop-shadow(0 0 4px #00f2fe);"></circle>
+                                    </svg>
+                                    <div class="radial-circle-val" id="radialValPos">0%</div>
+                                </div>
+                                <span class="radial-circle-lbl">Positive</span>
+                            </div>
+
+                            <!-- Negative -->
+                            <div class="sentiment-radial-item">
+                                <div class="radial-circle-wrap">
+                                    <svg viewBox="0 0 36 36" style="width:100%; height:100%; transform:rotate(-90deg);">
+                                        <circle cx="18" cy="18" r="14.5" fill="none" stroke="#232838" stroke-width="3.5"></circle>
+                                        <circle id="radialCircleNeg" cx="18" cy="18" r="14.5" fill="none" stroke="#f43f5e" stroke-width="3.5" stroke-dasharray="91" stroke-dashoffset="91" stroke-linecap="round" style="transition:stroke-dashoffset 0.8s ease; filter:drop-shadow(0 0 4px #f43f5e);"></circle>
+                                    </svg>
+                                    <div class="radial-circle-val" id="radialValNeg">0%</div>
+                                </div>
+                                <span class="radial-circle-lbl">Negative</span>
+                            </div>
+
+                            <!-- Neutral -->
+                            <div class="sentiment-radial-item">
+                                <div class="radial-circle-wrap">
+                                    <svg viewBox="0 0 36 36" style="width:100%; height:100%; transform:rotate(-90deg);">
+                                        <circle cx="18" cy="18" r="14.5" fill="none" stroke="#232838" stroke-width="3.5"></circle>
+                                        <circle id="radialCircleNeu" cx="18" cy="18" r="14.5" fill="none" stroke="#64748b" stroke-width="3.5" stroke-dasharray="91" stroke-dashoffset="91" stroke-linecap="round" style="transition:stroke-dashoffset 0.8s ease;"></circle>
+                                    </svg>
+                                    <div class="radial-circle-val" id="radialValNeu">0%</div>
+                                </div>
+                                <span class="radial-circle-lbl">Neutral</span>
+                            </div>
+                        </div>
+                    </div>
+
+                                        <!-- Map Distribution (Vector World Map) -->
+                    <div class="card" style="display:flex; flex-direction:column; justify-content:space-between;">
+                        <div class="chart-header" style="margin-bottom:4px;">
+                            <div class="chart-title">Map distribution</div>
+                            <span style="font-size:11px; font-weight:600; color:var(--text-secondary);" id="mapAudienceStatus">Global Telemetry</span>
+                        </div>
+
+                        <div class="map-dist-wrap">
+                            <svg viewBox="0 0 2000 1001" class="world-vector-map" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <g class="map-countries-group">
+<path class="map-country" id="AD" data-name="Andorra" d="M985.4 301.7l.1-.2.1-.2v-.1l-.2-.1-.7-.2-.3-.1-.2.1-.2.2-.1.3.1.1v.4l.1.2h.4l.3-.1.5-.3h.1z"/>
+<path class="map-country" id="AE" data-name="United Arab Emirates" d="M1283.9 408.6l-1.3-2.2-3 3.9-3.7 4.1-3.3 4.3-3.3-.2-4.6-.2-4.2 1-.3-1.7-1 .3.4 1.5 2.6 6.4 16.8 3.2 1-1.3-.1-2.6 1.4-2.6-.3-2.6 2.4-1.3-1.1-.8.1-4.2h2.8l-1.3-5z"/>
+<path class="map-country" id="AF" data-name="Afghanistan" d="M1369.9 333.8h-5.4l-3.8-.5-2.5 2.9-2.1.7-1.5 1.3-2.6-2.1-1-5.4-1.6-.3v-2l-3.2-1.5-1.7 2.3.2 2.6-.6.9-3.2-.1-.9 3-2.1-1.3-3.3 2.1-1.8-.8-4.3-1.4h-2.9l-1.6-.2-2.9-1.7-.3 2.3-4.1 1.2.1 5.2-2.5 2-4 .9-.4 3-3.9.8-5.9-2.4-.5 8-.5 4.7 2.5.9-1.6 3.5 2.7 5.1 1.1 4 4.3 1.1 1.1 4-3.9 5.8 9.6 3.2 5.3-.9 3.3.8.9-1.4 3.8.5 6.6-2.6-.8-5.4 2.3-3.6h4l.2-1.7 4-.9 2.1.6 1.7-1.8-1.1-3.8 1.5-3.8 3-1.6-3-4.2 5.1.2.9-2.3-.8-2.5 2-2.7-1.4-3.2-1.9-2.8 2.4-2.8 5.3-1.3 5.8-.8 2.4-1.2 2.8-.7-1.4-1.9z"/>
+<path class="map-country" id="AG" data-name="Antigua &amp; Barbuda" d="M634.3 463.8l.2-.1V463.4l-.1-.1-.1-.2-.4-.2-.5.5v.2l.1.3.6.1.2-.2zm.2-3.5v-.5l-.1-.2h-.3l-.1-.1h-.1l-.1.1.1.6.5.3.1-.2z"/>
+<path class="map-country" id="AI" data-name="Anguilla" d="M627.9 456.2l.1-.2-.2-.1-.8.5v.1l.9-.3z"/>
+<path class="map-country" id="AL" data-name="Albania" d="M1077.5 300.5l-2 3.1.5 1.9 1 1-.5 1.9-.1 4.3.7 3 3 2.1.2 1.4 1 .4 2.1-3 .1-2.1 1.6-.9V312l-2.3-1.6-.9-2.6.4-2.1-.5-2.3-1.3-.6-1.3-1.6-1.3.5-.4-1.2z"/>
+<path class="map-country" id="AM" data-name="Armenia" d="M1219 325.1l-.9-4.4-2.5-1.1-2.5-1.7 1-2-3.1-2.2.7-1.5-2.2-1.1-1.4-1.7-6.9 1 1.3 2.2v3.1l4.2 1.5 2.4 1.9 1-.2 1.8 1.7h2.3l.2 1 2.8 3.7 1.8-.2z"/>
+<path class="map-country" id="AO" data-name="Angola" d="M1068.3 609.6l-16.6-.1-1.9.7-1.7-.1-2.3.9-.5 1.2 2.8 4 1.1 4.3 1.6 6.1-1.7 2.6-.3 1.3 1.3 3.8 1.5 3.9 1.6 2.2.3 3.6-.7 4.8-1.8 2.8-3.3 4.2-1.3 2.6-1.9 5.7-.3 2.7-2 5.9-.9 5.5.5 4 2.7-1.2 3.3-1 3.6.1 3.2 2.9.9-.4 22.5-.3 3.7 3 13.4.9 10.3-2.5-3.5-4-3.6-5.2.8-20.3 11.6.1-.5-2.2.9-2.4-.9-3 .7-3-.5-2-2.6-.4-3.5 1-2.4-.2-1.4.6.5-7.6-1.9-2.3-.3-4 .9-3.8-1.2-2.4v-4h-6.8l.5-2.3h-2.9l-.3 1.1-3.4.3-1.5 3.7-.9 1.6-3-.9-1.9.9-3.7.5-2.1-3.3-1.3-2.1-1.6-3.8-1.3-4.7zm-21.8-1.3l.2-2.7.9-1.7 2-1.3-2-2.2-1.8 1.1-2.2 2.7 1.4 4.8 1.5-.7z"/>
+<path class="map-country" id="AR" data-name="Argentina" d="M669.8 920.7l.9-3-7.3-1.5-7.7-3.6-4.3-4.6-3-2.8 5.9 13.5h5l2.9.2 3.3 2.1 4.3-.3zm-50.4-208.1l-7.4-1.5-4 5.7.9 1.6-1.1 6.6-5.6 3.2 1.6 10.6-.9 2 2 2.5-3.2 4-2.6 5.9-.9 5.8 1.7 6.2-2.1 6.5 4.9 10.9 1.6 1.2 1.3 5.9-1.6 6.2 1.4 5.4-2.9 4.3 1.5 5.9 3.3 6.3-2.5 2.4.3 5.7.7 6.4 3.3 7.6-1.6 1.2 3.6 7.1 3.1 2.3-.8 2.6 2.8 1.3 1.3 2.3-1.8 1.1 1.8 3.7 1.1 8.2-.7 5.3 1.8 3.2-.1 3.9-2.7 2.7 3.1 6.6 2.6 2.2 3.1-.4 1.8 4.6 3.5 3.6 12 .8 4.8.9 2.2.4-4.7-3.6-4.1-6.3.9-2.9 3.5-2.5.5-7.2 4.7-3.5-.2-5.6-5.2-1.3-6.4-4.5-.1-4.7 2.9-3.1 4.7-.1.2-3.3-1.2-6.1 2.9-3.9 4.1-1.9-2.5-3.2-2.2 2-4-1.9-2.5-6.2 1.5-1.6 5.6 2.3 5-.9 2.5-2.2-1.8-3.1-.1-4.8-2-3.8 5.8.6 10.2-1.3 6.9-3.4 3.3-8.3-.3-3.2-3.9-2.8-.1-4.5-7.8-5.5-.3-3.3-.4-4.2.9-1.4-1.1-6.3.3-6.5.5-5.1 5.9-8.6 5.3-6.2 3.3-2.6 4.2-3.5-.5-5.1-3.1-3.7-2.6 1.2-.3 5.7-4.3 4.8-4.2 1.1-6.2-1-5.7-1.8 4.2-9.6-1.1-2.8-5.9-2.5-7.2-4.7-4.6-1-11.2-10.4-1-1.3-6.3-.3-1.6 5.1-3.7-4.6z"/>
+<path class="map-country" id="AT" data-name="Austria" d="M1060.2 264l-2.3-1.2-2.3.3-4-1.9-1.7.5-2.6 2.5-3.8-2-1.5 2.9-1.7.8 1 4-.4 1.1-1.7-1.3-2.4-.2-3.4 1.2-4.4-.3-.6 1.6-2.6-1.7-1.5.3.2 1.1-.7 1.6 2.3 1.1 2.6.2 3.1.9.5-1.2 4.8-1.1 1.3 2.2 7.2 1.6 4.2.4 2.4-1.4 4.3-.1.9-1.1 1.3-4-1.1-1.3h2.8l.2-2.6-.7-2.1.3-.8z"/>
+<path class="map-country" id="AU" data-name="Australia" d="M1726.7 832l-3-.5-1.9 2.9-.6 5.4-2.1 4-.5 5.3 3 .2.8.3 6.6-4.3.6 1.7 4-4.9 3.2-2.2 4.5-7.3-2.8-.5-4.8 1.2-3.4.9-3.6-2.2zm50.1-172.3l.5-2.3.1-3.6-1.6-3.2.1-2.7-1.3-.8.1-3.9-1.2-3.2-2.3 2.4-.4 1.8-1.5 3.5-1.8 3.4.6 2.1-1.2 1.3-1.5 4.8.1 3.7-.7 1.8.3 3.1-2.6 5-1.3 3.5-1.7 2.9-1.7 3.4-4.1 2.1-4.9-2.1-.5-2-2.5-1.6h-1.6l-3.3-3.8-2.5-2.2-3.9-2-3.9-3.5-.1-1.8 2.5-3.1 2.1-3.2-.3-2.6 1.9-.2 2.5-2.5 2-3.4-2.2-3.2-1.5 1.2-2-.5-3.5 1.8-3.2-2-1.7.7-4.5-1.6-2.7-2.7-3.5-1.5-3.1.9 3.9 2.1-.3 3.2-4.8 1.2-2.8-.7-3.6 2.2-2.9 3.7.6 1.5-2.7 1.7-3.4 5.1.6 3.5-3.4-.6h-3.5l-2.5-3.8-3.7-2.9-2.8.8-2.6.9-.3 1.6-2.4-.7-.3 1.8-3 1.1-1.7 2.5-3.5 3.1-1.4 4.8-2.3-1.3-2.2 3.1 1.5 3-2.6 1.2-1.4-5.5-4.8 5.4-.8 3.5-.7 2.5-3.8 3.3-2 3.4-3.5 2.8-6.1 1.9-3.1-.2-1.5.6-1.1 1.4-3.5.7-4.7 2.4-1.4-.8-2.6.5-4.6 2.3-3.2 2.7-4.8 2.1-3.1 4.4.4-4.8-3.1 4.6-.1 3.7-1.3 3.2-1.5 1.5-1.3 3.7.9 1.9.1 2 1.6 5-.7 3.3-1-2.5-2.3-1.8.4 5.9-1.7-2.8.1 2.8 1.8 5-.6 5 1.7 2.5-.4 1.9.9 4.1-1.3 3.6-.3 3.6.7 6.5-.7 3.7-2.2 4.4-.6 2.3-1.5 1.5-2.9.8-1.5 3.7 2.4 1.2 4 4.1h3.6l3.8.3 3.3-2.1 3.4-1.8 1.4.3 4.5-3.4 3.8-.3 4.1-.7 4.2 1.2 3.6-.6 4.6-.2 3-2.6 2.3-3.3 5.2-1.5 6.9-3.2 5 .4 6.9-2.1 7.8-2.3 9.8-.6 4 3.1 3.7.2 5.3 3.8-1.6 1.5 1.8 2.4 1.3 4.6-1.6 3.4 2.9 2.6 4.3-5.1 4.3-2.1 6.7-5.5-1.6 4.7-3.4 3.2-2.5 3.7-4.4 3.5 5.2-1.2 4.7-4.4-.9 4.8-3.2 3.1 4.7.8 1.3 2.6-.4 3.3-1.5 4.9 1.4 4 4 1.9 2.8.4 2.4 1 3.5 1.8 7.2-4.7 3.5-1.2-2.7 3.4 2.6 1.1 2.7 2.8 4.7-2.7 3.8-2.5 6.3-2.7 6-.2 4.2-2.3.9-2 3-4.5 3.9-4.8 3.6-3.2 4.4-5.6 3.3-3.1 4.4-5 5.4-3.1 5-5.8 3.1-4.5 1.4-3.6 3.8-5.7 2.1-2.9 2.5-5.7-.7-5.4 1.7-3.9 1.1-3.7v-5.1l-2.8-5.1-1.9-2.5-2.9-3.9.7-6.7-1.5 1-1.6-2.8-2.5 1.4-.6-6.9-2.2-4 1-1.5-3.1-2.8-3.2-3-5.3-3.3-.9-4.3 1.3-3.3-.4-5.5-1.3-.7-.2-3.2-.2-5.5 1.1-2.8-2.3-2.5-1.4-2.7-3.9 2.4-1.2-5z"/>
+<path class="map-country" id="AW" data-name="Aruba" d="M586.6 492.9l-.1-.1-.3-.6-.3-.3-.1.1-.1.3.3.3.3.4.3.1v-.2z"/>
+<path class="map-country" id="AZ" data-name="Azerbaijan" d="M1210.1 318.9l-1 .2 1.2 2.4 3.2 2.9 3.7.9-2.8-3.7-.2-1h-2.3l-1.8-1.7zm10.4-9.3l-4.3-3.8-1.5-.2-1.1.9 3.2 3.4-.6.7-2.8-.4-4.2-1.8-1.1 1 1.4 1.7 2.2 1.1-.7 1.5 3.1 2.2-1 2 2.5 1.7 2.5 1.1.9 4.4 5.3-4.7 1.9-.5 1.9 1.9-1.2 3.1 3.8 3.4 1.3-.3-.8-3.2 1.7-1.5.4-2.2-.1-5 4.2-.5-2-1.7-2.5-.2-3.5-4.5-3.4-3.2-2.6 2.5-.5 1.5-2.4-.4z"/>
+<path class="map-country" id="BA" data-name="Bosnia &amp; Herzegovina" d="M1062.2 284.9l-2.3.1-1 1.3-1.9-1.4-.9 2.5 2.7 2.9 1.3 1.9 2.5 2.3 2 1.4 2.2 2.5 4.7 2.4.4-3.4 1.5-1.4.9-.6 1.2-.3.5-2.9-2.7-2.3 1-2.7h-1.8l-2.4-1.4-3.5.1-4.4-1z"/>
+<path class="map-country" id="BB" data-name="Barbados" d="M644.9 488.9l.4-.4-.3-.3-.6-.8-.3.1v1l.1.3.5.3.2-.2z"/>
+<path class="map-country" id="BD" data-name="Bangladesh" d="M1486.5 431.9l-4.5-10.1-1.5.1-.2 4-3.5-3.3 1.1-3.6 2.4-.4 1.6-5.3-3.4-1.1-5 .1-5.4-.9-1.2-4.4-2.7-.4-4.8-2.7-1.2 4.3 4.6 3.4-3.1 2.4-.8 2.3 3.7 1.7-.4 3.8 2.6 4.8 1.6 5.2 2.2.6 1.7.7.6-1.2 2.5 1.3 1.3-3.5-.9-2.6 5.1.2 2.8 3.7 1.5 3.1.8 3.2 2 3.3-1.1-5.1 2.1 1-.5-4.6z"/>
+<path class="map-country" id="BE" data-name="Belgium" d="M1000.7 246.2l-4.4 1.3-3.6-.5-3.8 1.2.7 2.2 2.2.1 2.4 2.4 3.4 2.9 2.5-.4 4.4 2.8.4-3.5 1.3-.2.4-4.2-2.8-1.4-3.1-2.7z"/>
+<path class="map-country" id="BF" data-name="Burkina Faso" d="M978.8 477.2h-3.6l-1.4-1.2-3 .9-5.2 2.6-1.1 2-4.3 2.9-.8 1.6-2.3 1.3-2.7-.9-1.6 1.6-.8 4.4-4.5 5.2.2 2.2-1.6 2.7.4 3.7 2.5 1.4 1 2.1 2.5 1.3 1.9-1.6 2.7-.2 3.8 1.6-.8-4.8.2-3.6 9.7-.3 2.4.5 1.8-1 2.6.5 4.9.1 1.9-.7 1.2-2.8 2.7-.6 1.2-1.9.1-4.4-6.4-1.4-.2-3.1-3.1-4.1-.8-2.9.5-3.1z"/>
+<path class="map-country" id="BG" data-name="Bulgaria" d="M1121.6 294.3l-3-.7-4-2.2-5.8 1.4-2.3 1.6-7.5-.3-4-1-1.9.5-1.8-2.6-1.1 1.4.7 2.3 2.8 2.6-1.7 1.9-.7 2 .6.7-.7.9 2.8 2 .8 4.1 3.8.2 3.9-1.7 3.9 2.1 4.6-.6-.3-3 5-2 4.5.8-2.1-3.5 1.3-4.4 2.2-2.5z"/>
+<path class="map-country" id="BI" data-name="Burundi" d="M1148.2 590l-.3-2.5-3-.4-1.7 3.6-3.5-.5 1.4 2.9.1 1.1 2 6.1-.1.3.6-.1 2.1-2.3 2.2-3.3 1.4-1.4v-2l-1.2-1.5z"/>
+<path class="map-country" id="BJ" data-name="Benin" d="M996.9 498l-4.3-3.7h-2l-1.9 1.9-1.2 1.9-2.7.6-1.2 2.8-1.9.7-.7 3.3 1.7 1.9 2 2.3.2 3.1 1.1 1.3-.2 14.6 1.4 4.4 4.6-.8.3-10.2-.1-4.1 1-4 1.7-1.9 2.7-4-.6-1.7 1.1-2.5-1.2-3.8.2-2.1z"/>
+<path class="map-country" id="BM" data-name="Bermuda" d="M630.2 366.8l.4-.6h-.1l-.5.5-.6.2.1.1h.1l.6-.2z"/>
+<path class="map-country" id="BN" data-name="Brunei" d="M1617.8 543.4l2.7 3.3 1.1-2.2 2.7.2.1-4.1.1-3.1-4.6 3.5-2.1 2.4z"/>
+<path class="map-country" id="BO" data-name="Bolivia" d="M655.7 700.5l1.6-1.3-.8-3.6 1.3-2.8.5-5-1.6-4-3.2-1.7-.8-2.6.6-3.6-10.7-.3-2.7-7.4 1.6-.1-.3-2.8-1.2-1.8-.5-3.7-3.3-1.9-3.5.1-2.5-1.9-3.8-1.2-2.4-2.4-6.3-1-6.4-5.7.3-4.3-.9-2.5.4-4.7-7.3 1.1-2.8 2.3-4.8 2.6-1.1 1.9-2.9.2-4.2-.6 5.5 10.3-1.1 2.1.1 4.5.3 5.4-1.9 3.2 1.2 2.4-1.1 2.1 2.8 5.3-2.8 6.9 3.1 4.3 1.2 4.6 3.2 2.7-1.1 6.2 3.7 7.1 3.1 8.8 3.8-.9 4-5.7 7.4 1.5 3.7 4.6 1.6-5.1 6.3.3 1 1.3 1.5-7.6-.2-3.4 2.1-5.6 9.5-1.9 5.1.1 5.4 3.3.3 1.9z"/>
+<path class="map-country" id="BR" data-name="Brazil" d="M659 560.1l-1.4.2-3.1-.5-1.8 1.7-2.6 1.1-1.7.2-.7 1.3-2.7-.3-3.5-3-.3-2.9-1.4-3.3 1-5.4 1.6-2.2-1.2-3-1.9-.9.8-2.8-1.3-1.5-2.9.3.7 1.8-2.1 2.4-6.4 2.4-4 1-1.7 1.5-4.4-1.6-4.2-.8-1 .6 2.4 1.6-.3 4.3.7 4 4.8.5.3 1.4-4.1 1.8-.7 2.7-2.3 1-4.2 1.5-1.1 1.9-4.4.5-3-3.4-1.1.8-1-3.8-1.6-2-1.9 2.2-10.9-.1v3.9l3.3.7-.2 2.4-1.1-.6-3.2 1v4.6l2.5 2.4.9 3.6-.1 2.8-2.2 17.4-5.1-.3-.7 1-4.6 1.2-6.2 4.3-.4 3-1.3 2.2.7 3.4-3.3 1.9.1 2.7-1.5 1.1 2.6 5.8 3.3 3.8-1 2.8 3.7.3 2.3 3.4 4.9.2 4.4-3.8.2 9.7 2.6.7 3-1.1 4.2.6 2.9-.2 1.1-1.9 4.8-2.6 2.8-2.3 7.3-1.1-.4 4.7.9 2.5-.3 4.3 6.4 5.7 6.3 1 2.4 2.4 3.8 1.2 2.5 1.9 3.5-.1 3.3 1.9.5 3.7 1.2 1.8.3 2.8-1.6.1 2.7 7.4 10.7.3-.6 3.6.8 2.6 3.2 1.7 1.6 4-.5 5-1.3 2.8.8 3.6-1.6 1.3 1.9 3.6.4 8.6 6 1.2 2.1-1.2 3.9 1.7 1.2 1.9 1 5.8.9 2.5 2 .3 2-1.1 2.1 1.2.3 3.5-.3 3.8-.7 3.6 2.6-1.2 3.1 3.7.5 5.1-4.2 3.5-3.3 2.6-5.3 6.2-5.9 8.6 3.4-.7 6.2 4.9 1.9-.2 6.2 4.1 4.8 3.5 3.8 4.3-1.9 3 2.1 3.7 2.9-3.7 1.5-6 3.2-3 3.9-5 4.5-11.2 3.4-3.5.8-3.1.3-6.4-1.3-3.5.3-4.8 4.1-6.3 6-5.1 6-1.8 3.6-2.9 8.5-2.4h5.9l1.1-3.8 4.2-2.8.6-6.5 5.1-8.3.5-8.5 1.6-2.6.3-4.1 1.1-9.9-1-11.9 1.4-4.7 1.4-.1 3.9-5.5 3.3-7.2 7.7-8.8 2.7-4.2 2-10.5-1-3.9-2-8.1-2.1-2-4.8-.2-4.3-1.9-7.3-7.1-8.4-5.3-8.4.3-10.9-3.4-6.5 2 .8-3.5-2.7-3.8-9.4-3.8-7.1-2.3-4.2 4.1-.3-6.3-9.9-1-1.7-2 4.2-5.2-.1-4.4-3-1-3-11.2-1.3-3.5-1.9.3-3.5 5.8-1.8 4.7-2.1 2.4-2.7.5-.8-1.8-1.2-.3-1.8 1.8-2.4-1.3-3.2-1.4-2.7.7-2.3-.6-.5 1.8.9 1.3-.5 1.3-3.1-.5z"/>
+<path class="map-country" id="BS" data-name="Bahamas" d="M574.4 437.3l.2-.6-.3-.1-.5.7-.6.3h-.3l-.7-.3h-.5l-.4.5-.6.1.1.1v.2l-.2.3v.2l.1.3 1.5-.1 1.3-.2.7-.9.2-.5zm.8-2l-.4-.3-.4.3.1.3.7-.3zm0-5.8l-.4-.2-.3.5.3.1.7-.1.5.1.5.4.3-.2-.1-.1-.4-.3-.6-.1h-.2l-.3-.1zm-6.6 1.3l.7-.6.7-.3.9-1.1-.1-.9.2-.4-.6.1-.1.3-.1.3.3.4v.2l-.2.4-.3.1-.1.2-.3.1-.4.5-.8.6-.2.3.4-.2zm1.2-3.2l-.6-.2-.2-.4-.4-.1-.1.2v.2l.1.4.2-.1.8.4.4-.3-.2-.1zm-4.1-1.1v-.7l-.4-.5-.6-.4-.1-1.2-.3-.7-.2-.6-.4-.8v.5l.1.1.1.6.4.9.1.4-.1.4-.4.1-.1.2.5.3.8.3.5 1.3.1-.2zm-4.1-3.5l-.5-.3-.2-.3-.7-.7-.3-.1-.2.4.4.1.9.7.4.2h.2zm7.3-4l-.1-.3h-.1l-.3.1-.3.9h.3l.5-.7zm-17.6-1.1l-.2-.3-.3.2h-.5l-.2.1h-.4l-.3.2.4.8.3.3.1 1 .2.1-.1.7 1.1.1.4-.8V418.6l-.3-.5-.4.6-.4-.3.6-.4v-.1zm12.9.3l-1-1.4v-.2l-.5-1.5-.3-.1-.1.1-.1.2.4.4v.4l.3.2.4 1.1.4.4-.1.3-.4.3-.1.2h.1l.6-.1h.4v-.3zm-10.5-5.2l.5-.2-.3-.2h-.7l-.4.1-.2.2.1.1.4.1.6-.1zm-2.4 2l-.5-.6-.3-.9-.2-.4.1-.5-.3-.4-.6-.4-.3.1.1 1.1-.2.6-.8 1.1.1.4.1.2-.5.4v-.3l-.6.1.3.5.6.4.3.1.3-.2v.5l.3.4.1.4.3-.3.6-.2.2-.2.7-.4v-.2l.1-.6.1-.7zm6.7-5l-.3-.5-.1.1-.1.4-.3.4.5-.1.4.1.6.5.7.2.3.6.6.6v.6l-.4.6-.1.7-.6.1.1.1.3.3.1.4.2.2v-.7l.3-.8.4-1.3-.1-.3-.3-.3-.7-.9-.7-.3-.8-.7zm-8.8-7.9l-.5-.4-.2.4v.1l-.1.3-.5.4-.5.1-.7-.6-.2-.1.8 1.1.3.1h.4l.9-.3 1.6-.5 1.7-.2.1-.2-.1-.3-.8.2-1-.1-.2.2h-.4l-.6-.2zm6.1 5.2l.2-.3.4-1.8.8-.6.1-1.2-.5-.5-.4-.2-.1-.2.1-.2-.2-.1-.3-.2-.4-.6-.4-.4-.7-.1-.6-.1-.4-.1-.5.3h.8l1.5.3.7 1.5.5.4.1.4-.2.4v.4l-.3.5-.1.8-.3.4-.7.5.4.2.3.6.2-.1z"/>
+<path class="map-country" id="BT" data-name="Bhutan" d="M1474.7 395.5l-2.7-1.8-2.9-.1-4.2-1.5-2.6 1.6-2.6 4.8.3 1.2 5.5 2.5 3.2-1 4.7.4 4.4-.2-.4-3.9-2.7-2z"/>
+<path class="map-country" id="BW" data-name="Botswana" d="M1116.7 685l-1-.5-3.2 1.5h-1.6l-3.7 2.5-2-2.6-8.6 2.2-4.1.2-.9 22.7-5.4.2-.6 18.5 1.4 1 3 6.1-.7 3.8 1.1 2.3 4-.7 2.8-2.8 2.7-1.9 1.5-3.1 2.7-1.5 2.3.8 2.5 1.8 4.4.3 3.6-1.5.6-2 1.2-3 3-.5 1.7-2.4 2-4.3 5.2-4.7 8-4.7-3.4-2.9-4.2-.9-1.5-4.1.1-2.2-2.3-.7-6-7-1.6-3.7-1.1-1.1-1.9-5.1z"/>
+<path class="map-country" id="BY" data-name="Belarus" d="M1112.8 219.4l-5.2-1.5-4.6 2.3-2.6 1 .9 2.6-3.5 2-.5 3.4-4.8 2.2h-4.6l.6 2.7 1.7 2.3.3 2.4-2.7 1.2 1.9 2.9.5 2.7 2.2-.3 2.4-1.6 3.7-.2 5 .5 5.6 1.5 3.8.1 2 .9 1.6-1.1 1.5 1.5 4.3-.3 2 .6-.2-3.1 1.2-1.4 4.1-.3-2-3.9-1.5-2 .8-.6 3.9.2 1.6-1.3-1.7-1.6-3.4-1.1.1-1.1-2.2-1.1-3.7-3.9.6-1.6-1-2.9-4.8-1.4-2.3.7-1-1.4z"/>
+<path class="map-country" id="BZ" data-name="Belize" d="M482.5 471.1l1.4-2.2 1-.2 1.3-1.7 1-3.2-.3-.6.9-2.3-.4-1 1.3-2.7.3-1.8h-1.1l.1-.9h-1l-2.5 3.9-.9-.8-.7.3-.1 1-.7 5-1.2 7.2h1.6z"/>
+<path class="map-country" id="CA" data-name="Canada" d="M659 276.7l-.7-3-2.5 1.9.5 2.1 5.6 2.6 1.9-.4 3.3-2.5-4.7.1-3.4-.8zm14.4-15.9l.2-1.1-4.1-2.6-5.9-1.6-1.9.6 3.5 2.9 5.7 1.9 2.5-.1zm-305.3 3.7l.2-3.4-3.2-2.6-.4-2.9-.1-2.1-4.1-.7-2.4-.9-4.1-1.4-1.4 1.5-.6 3.3 4.3 1.1-.4 1.8 2.9 2.2v2.2l6.3 2.8 3-.9zM704.2 251l3.9-3.8 1.4-1.7-2.1-.3-4.9 2.2-4.2 3.5-8.1 9.8-5.3 3.7 1.6 1.7-3.8 2.2.2 1.9 9.6.1 5.4-.3 4.4 1.5-4.4 2.9 2.9.2 7.3-5.4 1.2.8-2.5 5.1 3 1.2 2.3-.2 3.5-5.5-.5-3.9.3-3.3-3.7 1.1 2.8-4.6-4.3-1.9-2.7 1.5-3.9-1.7 2.4-2.1-2.9-1.3-3.8 2 4.9-5.4zm-356.8-21.2l-1.9 2-1.4 2.6.9 1.9-.6 2.8.7 2.8h1.9l-.2-4.9 7.1-6.9-4.9.5-1.6-.8zm280.9-47l-.4-1.2-1.7-.1-2.8 1.7-.4.4.1 1.7 1.7.5 3.5-3zm-9.6-3.2l.8-1.1-6-.1-4.9 2.7v1.5l3 .2 7.1-3.2zm-3.1-16.6l-2.7-.5-5 5.2-3.6 4.4-5.7 2.8 6.3-.6-.8 3.4 8.2-3 6.2-3 .8 2.6 5.9 1.3 4.9-1.8-1.9-1.8-3.4.4 1.3-2.7-3.7-1.7-3.4-1.9-1.5-1.5-2.8.9.9-2.5zm44.6-8.2l3.7-1.7 1-.7 1.4-2.3-2.3-1.5-4.2.7-3.8 3.1-.7 2.6 4.9-.2zm-73.8-10.7l-.8-2-.3-1-1.6-1-3-1.5-4.9 2.3-5 1.7 3.5 2.4 3.8-.6 4.1 1.6 4.2-1.9zm22.4-2.1l-6.6-1 5.7-2.6-.4-6-1.9-2.3-4.5-.8-8.1 3.8-5.5 5.8 2.9 2.1 1.6 3.3-6.3 5.5-3.2-.2-6.2 4.4 4.2-5.2-4.8-1.8-4.5.9-2.4 3.4-5.9-.1-7.2.8-5.1-2.4-5 .4-1.5-2.9-2.1-1.3-3.8.5-5.2.3-4.4 1.8 2 2.3-7 2.8-1.4-3.3-4.4 1-11.8.6-6.4-1.2 8.5-2.6-2.8-2.8-4.4.4-4.7-1-7.5-1.9-3.8-2.3-4.5-.3-3.3 1.6-5.9.9 3.9-4.1-9.4 3.6-1.4-4.7-2.1-.6-3.8 2.5-4.5 1.2-.2-2.2-8.2 1.4-8.8 2.3-5.2-.6-7 1.6-6.2 2.3-3.7-.5-3.3-2.6-5.9-1.3-24.3 20.2-35.4 32.4 4.2.1 2.7 1.6.6 2.6.2 3.9 7.6-3.3 6.4-1.9-.5 3 .7 2.4 1.7 2.7-1.1 4.2-1.5 6.8 4.6 3.8-3.1 3.7-5.1 2.9-2.5 3.1 2.1 4.4-3.1 4.9 4.1 2.6-3.6 3.7-1.3 5.5 6.9 2.5 1.6 2.7 5.4 6.1h136.6l1.3-2.4h1.6l-.8 3.4 1 1 3.2.4 4.6 1 3.8 1.9 4.4-.8 5.3 1.6 3.2-2.4 3.2-1 1.8-1.5 1.5-.8 4 1.2 3.3.2.8.8.1 3.5 5.2 1-1.7 1.7 1.2 1.9-1.9 2.3 1.8.8-1.9 2.1 1.2.2 1.3-.9.5 1.4 3.4.7 3.8.1 3.8.6 4 1.2.8 2 1.4 4.7-2.4 2-3.8-.8-1-3.8-.9 3.9-3.8 3.4-.8 2.9-1.1 1.7-4.1 2-3.7 3.4-2 2.2 2.7.4 4.5-2 2.9-1.7 1.6-.3 2.6.6 1.7-.9 2.8-.8 4.7-.8.3-1.8-.3.1-1.7.3-1.8-.6 2.3-2.1 1.9-.7 3.9-.9 4.6-.9 1.8 1.2 1.9-1.4 1.9-.8.9.4.1.1 6.7-4.2 2.7-1.2h17l1-1.6 1.7-.3 2.5-.9 2.7-2.8 3.2-4.9 5.5-4.7 1.1 1.7 3.7-1.1 1.5 1.8-2.8 8.5 2.1 3.5 5.9-.8 8.1-.2-10.4 5.1-1.5 5.2 3.7.5 7.1-4.5 5.8-2.4 12.2-3.7 7.5-4.1-2.6-2.2 1-4.5-7.1 7-8.6.8-5.5-3.1-.1-4.6.6-6.8 6.1-4.1-3.3-3.1-7.6.6-12.1 5.2-10.9 8.2-4.6 1 7.8-5.7 10.1-8.3 7.2-2.7 5.7-4.4 5.2-.5 7.3.1 10 1.3 8.6-1 7.8-5.1 8.7-2.2 4.2-2.1 4.2-2.3 2-6.8-1.1-2.3-3.4-.8v-5.1l-2.3-1.9-6.9-1.6-2.8-3.4-4.8-3.4 3.4-3.7-2-7.1-2.6-7.5-1-5.2-4.3 2.7-7.4 6.5-8.1 3.2-1.6-3.4-3.7-1 2.2-7.3 2.6-4.9-7.7-.5-.1-2.2-3.6-3.3-3-2-4.5 1.5-4.2-.5-6.6-1.6-3.9 1.3-3.8 9-1 5.3-8.8 6.1 3.1 4.5.5 5-1.7 4-4.7 4.1-7.5 4.2-9 2.8 1.7 3.2-2.2 9.6-5.6 6.3-4.6 1.9-4.4-5.8-.1-6.8 1.7-6 3.6-5.2-4.8-.6-7.5-.4-3.6-2.5-4.8-1.6-1.7-2.9-3.3-2.2-7-2.6-7.1 1.2.7-4.5 1.5-5.5-6-1 4.9-6.8 4.9-4.6 9.4-6.5 8.6-4.6 5.6-.7 2.9-3.7 5.1-2.4 6.4-.4 7.7-3.8 2.9-2.4 7.4-4.7 3.2-2.8 3.2 1.7 6.5-.9L637 155l2.3-2.7-.8-2.9 5-2.9 1.7-2.7-3.5-2.6-5.4-.8-5.5-.4-4.6 5.9-6.5 4.6-7.2 4-1.3-3.7 4.2-4-2.2-3.5-8.7 4.2 4.3-5.5zm-75.5-18.9l-2.8-1-14.1 3.2-5.1 2-7.8 3.9 5.4 1.4 6.2-.1-11.5 2.1v1.9l5.6.1 9-.4 6.5 1.2-6.2 1-5.5-.3-7.1.9-3.3.6.6 4.2 4.2-.6 4.1 1.5-.3 2.5 7.8-.5 11.2-.8 9.4-1.8 5-.4 5.7 1.5 6.7.8 3.1-1.9-.7-2.1 7-.4 2.6-2.4-5-2.5-4.2-2.6 2.4-3.6 2.7-5.1-2.2-2-3-.9-4.2.8-2.8 5.3-4.3 2.1 2.2-5.1-1.7-1.7-7.3 2.7-2.6-2.6-10.4 1.5 4.7-2.4zm39.1-1.5l-1.7-1.1-5.4.2-2.1.7 2.2 3.6 7-3.4zm107.7 1.6l-4.4-2.8-8.4-.5-2.1.3-1.7 1.8 2 2.8.9.3 4.8-.7 4.1.1 4.1.1.7-1.4zm-39.4-.3l5.7-3.2-11.2 1.3-5.8 2.1-7.1 4.6-3.3 5.2 5.6.1-6.1 2.3 1.8 1.9 5.9.8 7.3 1.5 13.8 1.2 7.9-.6 3.2-1.6 2 1.8 3.3.3 2 3.3-3.5 1.4 7.1 1.8 4.6 2.6.5 1.9-.4 2.4-8.6 5.4-3.2 2.7.2 2-9.2.7-8 .1-5.4 4.2 2.4 1.9 13-.9.9-1.6 4.7 2.7 4.7 2.9-2.4 1.6 3.8 2.8 7.6 3.3 10.7 2.3.3-2-2.8-3.5-3.5-4.9 8.5 4.6 4.7 1.5 3.6-4.1v-5.6l-1-1.5-4.4-2.5-2.7-3.3 2.3-3.2 5.8-.7 3.8 5.4 4 2.4 10.7-6.5 3.3-3.9-6.4-.3-3.2-5.1-5.9-1.2-7.7-3.5 9-2.5-.8-5-2.2-2.1-8.3-2.1-1.9-3.3-8.2 1.2 1.1-2.3-3.6-2.5-6.8-2.6-5.2 2.1-9 1.5 3.3-3.4-2.3-5.3-11.6 2.1-7.1 4.1-.3-3.2zm-50-3.4l-7.1 2.4.9 3.4-7.4-.7-1.7 1.7 5.8 3.9.9 2 3.4.5 8.4-2 5.1-4.7-3.8-2.2 6-2.4.5-1.5-7.5.6-3.5-1zm22.3 5.4l5.6-1 10-4.5-6.1-1.2-7.8-.2-5.2 1.4-4.2 2.1-2.5 2.6-1.8 4.5 4.3.2 7.7-3.9zm-114.7 7.2l2.6-2.3 9.1-3.6 13.8-3.6 6.4-1.3-1.6-2.1-1.9-1.5-9.4-.2-4.1-1.1-14 .8-.3 3.1-7.6 3.3-7.4 3.8-4.3 2.2 5.9 2.7-.6 2.3 13.4-2.5zm124.1-18.3l.3-1.6-1.4-1.7-6.9 1.3-4.4 2.2 3.2 1.3 5.1.4 4.1-1.9zm-8.7-8.6l-1.1.7-4.8-.3-7.6 1.6-3.8-.1-4.3 3.8 6.6-.4-3.4 2.9 3.2.8 6.8-.5 5.8-3.7 2.8-2.5-.2-2.3zm-39.1 2.5l1.8-2.3-3.1-.5-5.7 1.7-.7 4.7-6.1-.4-2.8-2.9-8.2-1.6-5.4 1.4-11.6 4.8 4.1.8 17.8-.5-10.6 2.2-1.5 1.6 5.9-.1 12.2-2.2 13.8-.8 5.1-2.3 2.3-2.4-3.7-.2-4.3.8.7-1.8zm55.2-4.3l-7.1-.3-3.8 2 2.6 1.5 7 .6 1.4 2.1-2.2 2.4-1.5 2.8 8.5 1.6 5.5.6 8-.1 11.6-.8 4.3.6 6.7-1 3.5-1.4 1-2-2.3-1.9-5.8-.3-8 .4-7 1.1-5.1-.4-4.8-.3-1.2-1.1-3.1-1.1 2.8-1.9-1.4-1.6-7.3.1-2.3-1.6zm-75-2.6l-6 .7-5.5-.1-12.1 3.1-11.6 3.7 3.6 1 7-.7 9.8-2.1 3.8-.3 5.2-1.6 5.8-3.7zm80.5.6l1-.5-1.5-.9-7.2-.1-.6 1.3 6.4.3 1.9-.1zm-58.4-.8l3.2-1.4-4.1-.8-5.9.5-5.1 1.5 3.3 1.5 8.6-1.3zm7.8-4.2l-3.3-.9-1.6-.2-5.7 1.3-1 .7h6l5.6-.9zm46.4 2.5l3-1.7-2.3-1.6-1.7-.3-4.4-.1-2.1 1.8-.7 1.8 1.6 1.1 6.6-1zm-13.7-1.2l.1-2.2-7.4-1.7-6.1-.6-2.1 1.7 2.8 1.1-5.3 1.4 7.7.2 4 1.5 5.2.5 1.1-1.9zm53.7-6.1l.6-2.8-4.7-.8-4.7-.9-1.6-2.2-8.2.2.3.9-3.9.3-4.1 1.3-4.9 1.9-.3 1.9 2 1.5h6.5l-4.3 1.2-2.1 1.6 1.6 1.9 6.7.6 6.8-.4 10.5-3.4 6.4-1.3-2.6-1.5zm78.5-13.8l-7-.2-6.9-.3-10.2.6-1.4-.4-10.3.2-6.4.4-5.1.6-5 2-2.3-1-3.9-.2-6.7 1.4-7.4.6-4.1.1-6 .8-1.1 1.3 2.5 1.2.8 1.6 4.4 1.5 12.4-.3 7.2.5-7.2 1.5-2.2-.4-9.3-.2-1.1 2.2 3 1.7-2.8 1.6-7.5 1.1-4.9 1.7 4.8.9 1.7 3-7.5-2-2.5.3-2 3.4-8 1.1-2 2.3 6.7.3 4.9.6 11.7-.8 8.4 1.4 12.6-3 1-1.1-6.4.2.5-1.1 6.5-1.4 3.6-1.9 6.8-1.3 5-1.6-.8-2.2 3.3-.8-4.3-.6 11.1-.4 3.2-.9 7.9-.8 9.3-3.5 6.8-1.1 10.3-2.5h-7.4l3.9-.9 9-.8 9.7-1.6 1.1-1.1-5.2-1-6.7-.4-8.5-.3z"/>
+<path class="map-country" id="CD" data-name="Congo - Kinshasa" d="M1124.9 539.4l-4.3-.7-2 .6-.9 1.5-1.8.2-2.2-1.3-6.2 3.1-2.6-.6-.8.5-1.6 3.8-4.2-1.2-4.1-.6-3.6-2.4-4.6-2.1-3 2-2.2 3.2-.5 4.5-.3 3.8-1.6 3.4-1.1 4-.7 5.6.3 3.6-.9 2.2-.2 2.4-.6 2-3.7 3.1-2.6 3.2-2.5 6.2.2 5.3-1.4 2-3.3 3.1-3.4 4-2-1.1-.4-1.8-3.1-.1-1.9 2.4-1.5-.6-2 1.3-.9 1.7-.2 2.7-1.5.7.8 2 2.3-.9 1.7.1 1.9-.7 16.6.1 1.3 4.7 1.6 3.8 1.3 2.1 2.1 3.3 3.7-.5 1.9-.9 3 .9.9-1.6 1.5-3.7 3.4-.3.3-1.1h2.9l-.5 2.3h6.8v4l1.2 2.4-.9 3.8.3 4 1.9 2.3-.5 7.6 1.4-.6 2.4.2 3.5-1 2.6.4 1.9.1.3 2 2.6-.1 3.5.6 1.8 2.8 4.5.9 3.4-2 1.2 3.4 4.3.8 2 2.8 2.1 3.5h4.3l-.3-6.9-1.5 1.2-3.9-2.5-1.4-1.1.8-6.4 1.2-7.5-1.2-2.8 1.6-4.1 1.6-.7 7.5-1.1 1 .3.2-1.1-1.5-1.7-.7-3.5-3.4-3.5-1.8-4.5 1-2.7-1.5-3.6 1.1-10.2.1.1-.1-1.1-1.4-2.9.6-3.5.8-.4.2-3.8 1.6-1.8.1-4.8 1.3-2.4.3-5.1 1.2-3 2.1-3.3 2.2-1.7 1.8-2.3-2.3-.8.3-7.5-5-4.2-1.4-2.7-3.1 1.3-2.6-.4-1.5 1.1-2.5-.8-3.5-5.2-1.8.6-3.6-.1z"/>
+<path class="map-country" id="CF" data-name="Central African Republic" d="M1110.5 517.3l-.5-.3-2-1.8-.3-2 .8-2.6V508l-3.3-4-.7-2.7-3.5 1.1-2.8 2.5-4 7-5.2 2.9-5.4-.4-1.6.6.6 2.3-2.9 2.2-2.3 2.5-7.1 2.4-1.4-1.4-.9-.2-1 1.7-4.7.4-2.7 6.5-1.4 1.1-.4 5 .6 2.7-.4 1.9 2.6 3.3.5 2.3 2.1 3.2 2.6 2.1.3 2.9.6 1.8 2.9-5.9 3.3-3.4 3.8 1.1 3.6.4.5-4.5 2.2-3.2 3-2 4.6 2.1 3.6 2.4 4.1.6 4.2 1.2 1.6-3.8.8-.5 2.6.6 6.2-3.1 2.2 1.3 1.8-.2.9-1.5 2-.6 4.3.7 3.6.1 1.8-.6-.9-2.1-4.2-2.5-1.5-3.8-2.4-2.7-3.8-3.4-.1-2-3.1-2.6-3.8-2.5z"/>
+<path class="map-country" id="CG" data-name="Congo - Brazzaville" d="M1080.3 549.9l-3.6-.4-3.8-1.1-3.3 3.4-2.9 5.9-.4 3.5-4.5-1.5-4.5-1.7-7.1-.3-.4 2.8 1.5 3.3 4.2-.5 1.4 1.2-2.4 7.4 2.7 3.8.6 4.9-.8 4.3-1.7 3-4.9-.3-3-3-.5 2.8-3.8.8-1.9 1.6 2.1 4.2-4.3 3.5 4.6 6.7 2.2-2.7 1.8-1.1 2 2.2 1.5.6 1.9-2.4 3.1.1.4 1.8 2 1.1 3.4-4 3.3-3.1 1.4-2-.2-5.3 2.5-6.2 2.6-3.2 3.7-3.1.6-2 .2-2.4.9-2.2-.3-3.6.7-5.6 1.1-4 1.6-3.4.3-3.8z"/>
+<path class="map-country" id="CH" data-name="Switzerland" d="M1024.3 270.6l-5.4-1.9-1 1.4h-4.2l-1.3 1-2.3-.6.2 1.6-3.5 3.5v2.8l2.4-.9 1.8 2.7 2.2 1.3 2.4-.3 2.7-2.1.9 1 2.4-.2.9-2.5 3.8.8 2.1-1.1.3-2.5-2.6-.2-2.3-1.1.7-1.6-.2-1.1z"/>
+<path class="map-country" id="CI" data-name="CÃƒÂ´te dÃ¢â‚¬â„¢Ivoire" d="M946.5 506.2l-2.3.9-1.3.8-.9-2.7-1.6.7-1-.1-1 1.9-4.3-.1-1.6-1-.7.6-1.1.5-.5 2.2 1.3 2.6 1.3 5.1-2 .8-.6.9.4 1.2-.3 2.8h-.9l-.3 1.8.6 3.1-1.2 2.8 1.6 1.8 1.8.4 2.3 2.7.2 2.5-.5.8-.5 5.2 1.1.2 5.6-2.4 3.9-1.8 6.6-1.1 3.6-.1 3.9 1.3 2.6-.1.2-2.5-2.4-5.5 1.5-7.2 2.3-5.3-1.4-9.1-3.8-1.6-2.7.2-1.9 1.6-2.5-1.3-1-2.1-2.5-1.4z"/>
+<path class="map-country" id="CL" data-name="Chile" d="M648.4 905.2l-3.7-.7-3.3 2.5.2 4.1-1.2 2.8-7.2-2.2-8.6-4-4.5-1.3 9.7 6.8 6.3 3.2 7.5 3.4 5.3.9 4.3 1.8 3 .5 2.3.1 3.2-1.8.5-2.4-2.9-.2h-5l-5.9-13.5zm-47.3-196.3l-3.7-7.1 1.1-6.2-3.2-2.7-1.2-4.6-3.1-4.3-1.2 3.3-2.7 1.6 2.1 9 1.5 10.4-.1 14.2v13.2l.9 12.3-1.9 7.8 2.1 7.8-.5 5.3 3.2 9.5-.1 9.5-1.2 10.2-.6 10.5-2.1.2 2.4 7.3 3.3 6.3-1.1 4.3 1.9 11.6 1.5 8.8 3.5.9-1.1-7.7 4 1.6 1.8 12.7-6.4-2.1 2 10.2-2.7 5.5 8.2 1.8-3.4 4.8.2 6 5 10.6 4.2 4.1.2 3.6 3.3 3.8 7.5 3.5 7.4 4.2 6.2 2 2-.1-1.8-5.7 3.4-2.2 1.7-1.5h4.2l-4.8-.9-12-.8-3.5-3.6-1.8-4.6-3.1.4-2.6-2.2-3.1-6.6 2.7-2.7.1-3.9-1.8-3.2.7-5.3-1.1-8.2-1.8-3.7 1.8-1.1-1.3-2.3-2.8-1.3.8-2.6-3.1-2.3-3.6-7.1 1.6-1.2-3.3-7.6-.7-6.4-.3-5.7 2.5-2.4-3.3-6.3-1.5-5.9 2.9-4.3-1.4-5.4 1.6-6.2-1.3-5.9-1.6-1.2-4.9-10.9 2.1-6.5-1.7-6.2.9-5.8 2.6-5.9 3.2-4-2-2.5.9-2-1.6-10.6 5.6-3.2 1.1-6.6-.9-1.6-3.8.9-3.1-8.8z"/>
+<path class="map-country" id="CM" data-name="Cameroon" d="M1060.1 502.9l.2-4.3-.5-4.2-2.2-4.1-1.6.4-.2 2 2.3 2.6-.6 1.1-.3 2.1-4.6 5-1.5 4-.7 3.3-1.2 1.4-1.1 4.5-3 2.6-.8 3.2-1.2 2.6-.5 2.6-3.9 2.2-3.2-2.6-2.1.1-3.3 3.7-1.6.1-2.7 6.1-1.4 4.5v1.8l1.4.9 1.1 2.8 2.6 1.1 2.2 4.2-.8 5 9.2.2 2.6-.4 3.4.8 3.4-.8.7.3 7.1.3 4.5 1.7 4.5 1.5.4-3.5-.6-1.8-.3-2.9-2.6-2.1-2.1-3.2-.5-2.3-2.6-3.3.4-1.9-.6-2.7.4-5 1.4-1.1 2.7-6.5.9-1.7-1.8-4.4-.8-2.6-2.5-1.1-3.3-3.7 1.2-3 2.5.6 1.6-.4 3.1.1-3.1-5.8z"/>
+<path class="map-country" id="CN" data-name="China" d="M1587.2 453.3l.6-3.6 2-2.8-1.6-2.5-3.2-.1-5.8 1.8-2.2 2.8 1 5.5 4.9 2 4.3-3.1zm13.2-196.5l-6.1-6.1-4.4-3.7-3.8-2.7-7.7-6.1-5.9-2.3-8.5-1.8-6.2.2-5.1 1.1-1.7 3 3.7 1.5 2.5 3.3-1.2 2 .1 6.5 1.9 2.7-4.4 3.9-7.3-2.3.6 4.6.3 6.2 2.7 2.6 2.4-.8 5.4 1 2.5-2.3 5.1 2 7.2 4.3.7 2.2-4.3-.7-6.8.8-2.4 1.8-1.4 4.1-6.3 2.4-3.1 3.3-5.9-1.3-3.2-.5-.4 4 2.9 2.3 1.9 2.1-2.5 2-1.9 3.3-4.9 2.2-7.5.2-7.2 2.2-4.4 3.3-3.2-2-6.2.1-9.3-3.8-5.5-.9-6.4.8-11.2-1.3-5.5.1-4.7-3.6-4.9-5.7-3.4-.7-7.9-3.8-7.2-.9-6.4-1-3-2.7-1.3-7.3-5.8-5-8.1-2.3-5.7-3.3-3.3-4.4-1.7.5-1.8 4.2-3.8.6 2.5 6.2-1.6 2.8-10.7-2 1 11.1-2 1.4-9 2.4 8.7 10.7-2.9 1.6 1.7 3.5-.2 1.4-6.8 3.4-1 2.4-6.4.8-.6 4-5.7-.9-3.2 1.2-4 3 1.1 1.5-1 1.5 3 5.9 1.6-.6 3.5 1.4.6 2.5 1.8 3.7 1.4 1.9 4.7 3 2.9 5 9.4 2.6 7.6 7.5.8 5.2 3 3.3.6 3.3-4.1-.9 3.2 7 6.2 4 8.5 4.4 1.9-1.5 4.7 2 6.4 4.1 3.2.9 2.5 3.1 4.5 1.2 5 2.8 6.4 1.5 6.5.6 3-1.4 1.5 5.1 2.6-4.8 2.6-1.6 4.2 1.5 2.9.1 2.7 1.8 4.2-.8 3.9-4.8 5.3-4 4.9 1.5 3.2-2.6 3.5 3.9-1.2 2.7 6.1.9 3-.4 2.7 3.7 2.7 1.5 1.3 4.9.8 5.3-4.1 5.3.7 7.5 5.6-1 2.3 5.8 3.7 1.3-.8 5.2 4.5 2.4 2.5 1.2 3.8-1.8.6 2.6.7 1.5 2.9.1-1.9-7.2 2.7-1 2.7-1.5h4.3l5.3-.7 4.1-3.4 3 2.4 5.2 1.1-.2 3.7 3 2.6 5.9 1.6 2.4-1 7.7 2-.9 2.5 2.2 4.6 3-.4.8-6.7 5.6-.9 7.2-3.2 2.5-3.2 2.3 2.1 2.8-2.9 6.1-.7 6.6-5.3 6.3-5.9 3.3-7.6 2.3-8.4 2.1-6.9 2.8-.5-.1-5.1-.8-5.1-3.8-2-2.5-3.4 2.8-1.7-1.6-4.7-5.4-4.9-5.4-5.8-4.6-6.3-7.1-3.5.9-4.6 3.8-3.2 1-3.5 6.7-1.8-2.4-3.4-3.4-.2-5.8-2.5-3.9 4.6-4.9-1.9-1.5-2.9-4.7-1-4.7-4.4 1.2-3 5-.3 1.2-4.1 3.6-4.4 3.4-2.2 4.4 3.3-1.9 4.2 2.3 2.5-1.4 3 4.8-1.8 2.4-2.9 6.3-1.9 2.1-4 3.8-3.4 1-4.4 3.6 2 4.6.2-2.7-3.3 6.3-2.6-.1-3.5 5.5 3.6-1.9-3.1 2.5-.1-3.8-7.3-4.7-5.3 2.9-2.2 6.8 1.1-.6-6-2.8-6.8.4-2.3-1.3-5.6-6.9 1.8-2.6 2.5h-7.5l-6-5.8-8.9-4.5-9.9-1.9z"/>
+<path class="map-country" id="CO" data-name="Colombia" d="M578.3 497.2l1.2-2.1-1.3-1.7-2-.4-2.9 3.1-2.3 1.4-4.6 3.2-4.3-.5-.5 1.3-3.6.1-3.3 3-1.4 5.4-.1 2.1-2.4.7-4.4 4.4-2.9-.2-.7.9 1.1 3.8-1.1 1.9-1.8-.5-.9 3.1 2.2 3.4.6 5.4-1.2 1.6 1.1 5.9-1.2 3.7 2 1.5-2.2 3.3-2.5 4-2.8.4-1.4 2.3.2 3.2-2.1.5.8 2 5.6 3.6 1-.1 1.4 2.7 4.7.9 1.6-1 2.8 2.1 2.4 1.5 1.5-.6 3.7 3 1.8 3 2.7 1.7 3.4 6.7 4.2.8 3-1.7 2.1 1.1 3.3-.6 4.4 3-3.5 6.5 1.7.1 2.9 3.4 2.2-17.4.1-2.8-.9-3.6-2.5-2.4v-4.6l3.2-1 1.1.6.2-2.4-3.3-.7v-3.9l10.9.1 1.9-2.2 1.6 2 1 3.8 1.1-.8-1.7-6.4-1.4-2.2-2-1.4 2.9-3.1-.2-1.5-1.5-1.9-1-4.2.5-4.6 1.3-2.1 1.2-3.4-2-1.1-3.2.7-4-.3-2.3.7-3.8-5.5-3.2-.8-7.2.6-1.3-2.2-1.3-.6-.2-1.3.8-2.4-.4-2.5-1.1-1.4-.6-2.9-2.9-.5 1.8-3.7.9-4.5 1.8-2.4 2.2-1.8 1.6-3.2 3.7-1.1z"/>
+<path class="map-country" id="CR" data-name="Costa Rica" d="M509.1 502.6l-1.4 1.3-1.7-.4-.8-1.3-1.7-.5-1.4.8-3.5-1.7-.9.8-1.4 1.2 1.5.9-.9 2-.1 2 .7 1.3 1.7.6 1.2 1.8 1.2-1.6-.3-1.8 1.4 1.1.3 1.9 1.9.8 2.1 1.3 1.5 1.5.1 1.4-.7 1.1 1.1 1.3 2.9 1.4.4-1.2.5-1.3-.1-1.2.8-.7-1.1-1 .1-2.5 2.2-.6-2.4-2.7-2-2.6-1.2-3.4z"/>
+<path class="map-country" id="CU" data-name="Cuba" d="M539 427.3l-4.9-2.1-4.3-.1-4.7-.5-1.4.7-4.2.6-3 1.3-2.7 1.4-1.5 2.3-3.1 2 2.2.6 2.9-.7.9-1.6 2.3-.1 4.4-3.3 5.4.3-2.3 1.6 1.8 1.3 7 1 1.5 1.3 4.9 1.7 3.2-.2.8 3.6 1.7 1.8 3.5.4 2.1 1.7-4.1 3.5 7.9-.6 3.8.5 3.7-.3 3.8-.8.8-1.5-3.9-2.6-4-.3.6-1.7-3.1-1.3h-1.9l-3-2.8-4.2-4-1.8-1.5-5.2.8-1.9-2.4z"/>
+<path class="map-country" id="CV" data-name="Cape Verde" d="M841.4 477.6l.1-.4-.2-.6-.3-.1-.6.4-.1.3.1.3.3.3.3.1.4-.3zm6.3-1.7l.4-.2v-.7l-.1-.3h-.4l-.2.4v.5l.2.3h.1zm-1.4.8l-.5-.9-.3-.1-.6-.7v-.3l-.3-.1V475.2l-.2.5v.5l.4.8.4.2.7.1.4-.6zm3.1-7.8v.5l-.3.7.5.3.3.1.6-.4.2-.5-.1-.3-.3-.3-.3-.1-.1.1-.5-.1zm-6.4-2.5l-1-.1-.6-.2h-.1v.3l.4.8.2-.5.2-.1.8.2.4-.1-.1-.1-.2-.2zm6.7-.2l-.1-.5v-.7h-.2l-.3.2.1.7.1.1.2.5.2-.3zm-11.1-1v-.2l-.3-.5-.3.1-.4.2-.1.3.4.2h.2l.5-.1zm-1.5-.9l.8-.6.2-.3-.2-.5-.5-.1-1.2.6-.1.2.1.3.1.5.2.1.6-.2z"/>
+<path class="map-country" id="CW" data-name="CuraÃƒÂ§ao" d="M595.9 494.9v-.6l-.9-.4v.3l.1.2.3.1.1.2-.1.6.2.3.3-.7z"/>
+<path class="map-country" id="CY" data-name="Cyprus" d="M1149.9 348.4l-.3-.1-.5.2-.4.4-.4.3-.5-.3.2.9.6 1.1.2.3.3.2 1.1.3H1151.1l.2.1.2.4h.4v-.4l.2-.2.3-.2h.3l.6-.1.6-.2.5-.4.9-1h1.2l.6-.1-.2-.4-.1-.1-.4-.5-.2-.4.1-.6 2.5-1.9.5-.5-.8.2-.6.4-.4.2-.7.4-2.3.8-.8.1h-.8l-1-.1-.9-.2v.7l-.2.6-.6.2-.3-.1z"/>
+<path class="map-country" id="CZ" data-name="Czechia" d="M1049.4 248.5l-2.1.6-1.4-.7-1.1 1.2-3.4 1.2-1.7 1.5-3.4 1.3 1 1.9.7 2.6 2.6 1.5 2.9 2.6 3.8 2 2.6-2.5 1.7-.5 4 1.9 2.3-.3 2.3 1.2.6-1.4 2.2.1 1.6-.6.1-.6.9-.3.2-1.4 1.1-.3.6-1.1h1.5l-2.6-3.1-3.6-.3-.7-2-3.4-.6-.6 1.5-2.7-1.2.1-1.7-3.7-.6-2.4-1.9z"/>
+<path class="map-country" id="DE" data-name="Germany" d="M1043.6 232.3l-2.4-1.9-5.5-2.4-2.5 1.7-4.7 1.1-.1-2.1-4.9-1.4-.2-2.3-3 .9-3.6-.8.4 3.4 1.2 2.2-3 3-1-1.3-3.9.3-.9 1.3 1 2-1 5.6-1.1 2.3h-2.9l1.1 6.4-.4 4.2 1 1.4-.2 2.7 2.4 1.6 7.1 1.2-2.3 4.2-.5 4.5h4.2l1-1.4 5.4 1.9 1.5-.3 2.6 1.7.6-1.6 4.4.3 3.4-1.2 2.4.2 1.7 1.3.4-1.1-1-4 1.7-.8 1.5-2.9-2.9-2.6-2.6-1.5-.7-2.6-1-1.9 3.4-1.3 1.7-1.5 3.4-1.2 1.1-1.2 1.4.7 2.1-.6-2.3-3.9.1-2.1-1.4-3.3-2-2.2 1.2-1.6-1.4-3.1z"/>
+<path class="map-country" id="DJ" data-name="Djibouti" d="M1217.8 499.2l-2.5-1.7 3.1-1.5.1-2.7-1.4-1.9-1.6 1.5-2.4-.5-1.9 2.8-1.8 3 .5 1.7.2 2 3.1.1 1.3-.5 1.3 1.1 2-3.4z"/>
+<path class="map-country" id="DK" data-name="Denmark" d="M1035.9 221.2l-1.7-3-6.7 2 .9 2.5 5.1 3.4 2.4-4.9zm-8.6-5.1l-2.6-.9-.7-1.6 1.3-2-.1-3-3.6 1.6-1.5 1.7-4 .4-1.2 1.7-.7 1.6.4 6.1 2.1 3.4 3.6.8 3-.9-1.5-3 3.1-4.3 1.4.7 1-2.3z"/>
+<path class="map-country" id="DM" data-name="Dominica" d="M635.8 475.1l.3-.7-.1-1-.2-.4-.8-.3v.2l-.1.5.3.8.1 1.1.5-.2z"/>
+<path class="map-country" id="DO" data-name="Dominican Republic" d="M579.6 457.4v1.8l1.4 1 2.6-4.4 2-.9.6 1.6 2.2-.4 1.1-1.2 1.8.3 2.6-.2 2.5 1.3 2.3-2.6-2.5-2.3-2.4-.2.3-1.9-3 .1-.8-2.2-1.4.1-3.1-1.6-4.4-.1-.8 1.1.2 3.5-.7 2.4-1.5 1.1 1.2 1.9-.2 1.8z"/>
+<path class="map-country" id="DZ" data-name="Algeria" d="M1021 336.9l-3.6.4-2.2-1.5h-5.6l-4.9 2.6-2.7-1-8.7.5-8.9 1.2-5 2-3.4 2.6-5.7 1.2-5.1 3.5 2 4.1.3 3.9 1.8 6.7 1.4 1.4-1 2.5-7 1-2.5 2.4-3.1.5-.3 4.7-6.3 2.5-2.1 3.2-4.4 1.7-5.4 1-8.9 4.7-.1 7.5v.4l-.1 1.2 20.3 15.5 18.4 13.9 18.6 13.8 1.3 3 3.4 1.8 2.6 1.1.1 4 6.1-.6 7.8-2.8 15.8-12.5 18.6-12.2-2.5-4-4.3-2.9-2.6 1.2-2-3.6-.2-2.7-3.4-4.7 2.1-2.6-.5-4 .6-3.5-.5-2.9.9-5.2-.4-3-1.9-5.6-2.6-11.3-3.4-2.6v-1.5l-4.5-3.8-.6-4.8 3.2-3.6 1.1-5.3-1-6.2 1-3.3z"/>
+<path class="map-country" id="EC" data-name="Ecuador" d="M553.1 573.1l-2.4-1.5-2.8-2.1-1.6 1-4.7-.9-1.4-2.7-1 .1-5.6-3.6-3.9 2.5-3.1 1.4.4 2.6-2.2 4.1-1 3.9-1.9 1 1 5.8-1.1 1.8 3.4 2.7 2.1-2.9 1.3 2.8-2.9 4.7.7 2.7-1.5 1.5.2 2.3 2.3-.5 2.3.7 2.5 3.2 3.1-2.6.9-4.3 3.3-5.5 6.7-2.5 6-6.7 1.7-4.1-.8-4.9z"/>
+<path class="map-country" id="EE" data-name="Estonia" d="M1093.2 197.5l-5.5.9-5.4 1.6.9 3.4 3.3 2.1 1.5-.8.1 3.5 3.7-1 2.1.7 4.4 2.2h3.8l1.6-1.9-2.5-5.5 2.6-3.4-.9-1-4.6.2-5.1-1z"/>
+<path class="map-country" id="EG" data-name="Egypt" d="M1129.7 374.8l-5.5-1.9-5.3-1.7-7.1.2-1.8 3 1.1 2.7-1.2 3.9 2 5.1 1.3 22.7 1 23.4h65.3l-1-1.3-6.8-5.7-.4-4.2 1-1.1-5.3-7-2-3.6-2.3-3.5-4.8-9.9-3.9-6.4-2.8-6.7.5-.6 4.6 9.1 2.7 2.9 2 2 1.2-1.1 1.2-3.3.7-4.8 1.3-2.5-.7-1.7-3.9-9.2-2.5 1.6-4.2-.4-4.4-1.5-1.1 2.1-1.7-3.2-3.9-.8-4.7.6-2.1 1.8-3.9 2-2.6-1z"/>
+<path class="map-country" id="EH" data-name="Western Sahara" d="M929.6 396.2h-.8l.1 3.4-3.4.2-1.8 1.5h-2.5l-1.9-.9-4.6.7-1.9 5-1.7.4-2.8 8.1-7.8 6.8-2 8.8-2.3 2.9-.7 2.3-12.4.5h-.1l-.3 2.7 1.2-2.2 21.6.1-.9-9.2 1.4-3.3 5.2-.5.2-16.3 17.9.3.2-9.7.1-1.2v-.4z"/>
+<path class="map-country" id="ER" data-name="Eritrea" d="M1198.1 474l-3.2-3.1-1.8-5.9-3.7-7.3-2.6 3.6-4 1-1.6 2-.4 4.2-1.9 9.4.7 2.5 6.5 1.3 1.5-4.7 3.5 2.9 3.2-1.5 1.4 1.3 3.9.1 4.9 2.5 1.6 2.2 2.5 2.1 2.5 3.7 2 2.1 2.4.5 1.6-1.5-2.8-1.9-1.9-2.2-3.2-3.7-3.2-3.6-7.9-6z"/>
+<path class="map-country" id="ES" data-name="Spain" d="M985 325.7v-.2h-.5l-.3-.4-.1.2-.1.2v.2h.5l.4.1.1-.1zm-.8-1.6h.3l.6-.7v-.3l-.3-.2-1.1.2-.2.3v.3l-.3.1-.1.4.1.2.8.1.2-.4zM967 296l-8.2-.2-4.2.3-5.4-1h-6.8l-6.2-1.1-7.4 4.5 2 2.6-.4 4.4 1.9-1.6 2.1-.9 1.2 3.1h3l.9-.8 3 .2 1.3 3.1-2.4 1.7-.2 4.9-.9.9-.3 3-2.2.5 2 3.8-1.6 4.3 1.8 1.9-.8 1.7-2 2.5.4 2.1 4.8 1 1.4 3.7 2 2.2 2.5.6 2.1-2.5 3.3-2.3 5 .1h6.7l3.8-5 3.9-1.3 1.2-4.2 3-2.9-2-3.7 2-5.1 3.1-3.5.5-2.1 6.6-1.3 4.8-4.2-.3-3.5-6 .8-5.7-2.8-1.9 1.3-9.4-2.8-2-2.4zm26 22.6l.1-.3.1-.2.1-.1-.2-.2v-.1l.2-.2-.2-.1-1.3.4-.7.4-2.1 1.5v.3l.1.2h.4l.2.4.4-.4.3-.1.3.1.3.2.1.6.1.2.6.1.9.4.4-.2.5-.3.2-.6.3-.5.3-.5.3-.4-.1-.4-.3-.1-.3-.1-.5.2-.5-.2zm6-.3l.1-.4v-.1l-.5-.7-.9-.3-1 .1-.1.1v.4l.1.1.6.1 1.6.7h.1zM879.6 395.2l-.2-.2-.7.5h-.6l.1.2.1.2.7.4.6-1.1zm13.5-2.1v-.1h-.1l-.1.1-1.3-.1-.2.6-.5.4v.7l.5.7.3.1.5.1.7-.4.2-.4.1-.8-.1-.4v-.5zm-9.7.8l.5-.4v-.2l-.1-.3-.5-.3h-.2l-.2.2-.2.4.3.5.2.1h.2zm4.7-2.3l1.2-1v-.3l-1 .1-1.1 1-.3.1-1 .1h-.5l-.4.2.2.3.4 1 .7.9.6-.2.3-.2.4-.6.5-1.4zm11.6 1.3l1.5-.5.3-1 .3-1.1v-.7l-.2-.3h-.5l-.3.2-.1.6-.7 1.3-.5 1.2-.7.6-.7.2.1.1.7.1.8-.7zm-19.7-2l.5-.5.1-.3-.1-.5.2-.2-.1-.4-.3-.4h-.7l-.4.6.6 1.2.1.5h.1zm22.4-2.7l.9-.3.5-.3.1-.9.2-.3-.2-.3-.2.2-.2.4-.6.2-.8.4-.2.3-.2.9.4.1.3-.4z"/>
+<path class="map-country" id="ET" data-name="Ethiopia" d="M1187.6 477l-1.5 4.7-6.5-1.3-.7 5.5-2.1 6.2-3.2 3.2-2.3 4.8-.5 2.6-2.6 1.8-1.4 6.7v.7l.2 5-.8 2-3 .1-1.8 3.6 3.4.5 2.9 3.1 1 2.5 2.6 1.5 3.5 6.9 2.9 1.1v3.6l2 2.1h3.9l7.2 5.4h1.8l1.3-.1 1.2.7 3.8.5 1.6-2.7 5.1-2.6 2.3 2.1h3.8l1.5-2 3.6-.1 4.9-4.5 7.4-.3 15.4-19.1-4.8.1-18.5-7.6-2.2-2.2-2.1-3.1-2.2-3.5 1.1-2.3-1.3-1.1-1.3.5-3.1-.1-.2-2-.5-1.7 1.8-3 1.9-2.8-2-2.1-2.5-3.7-2.5-2.1-1.6-2.2-4.9-2.5-3.9-.1-1.4-1.3-3.2 1.5-3.5-2.9z"/>
+<path class="map-country" id="FI" data-name="Finland" d="M1093.4 144.4l.8-3.8-5.7-2.1-5.8 1.8-1.1 3.9-3.4 2.4-4.7-1.3-5.3.3-5.1-2.9-2.1 1.4 5.9 2.7 7.2 3.7 1.7 8.4 1.9 2.2 6.4 2.6.9 2.3-2.6 1.2-8.7 6.1-3.3 3.6-1.5 3.3 2.9 5.2-.1 5.7 4.7 1.9 3.1 3.1 7.1-1.2 7.5-2.1 8-.5 7.9-7.4 3.3-3.3.9-2.9-7.3-3.9.9-3.7-4.9-4.1 1.7-4.8-6.4-6.3 2.8-4.1-7.2-3.7-.4-3.7z"/>
+<path class="map-country" id="FJ" data-name="Fiji" d="M1976.7 674.4l-3.7 2-1.9.3-3.1 1.3.2 2.4 3.9-1.3 3.9-1.6.7-3.1zm-11 8.1l-1.6 1-2.3-.8-2.7 2.2-.2 2.8 2.9.8 3.6-.9 1.8-3.3-1.5-1.8z"/>
+<path class="map-country" id="FK" data-name="Falkland Islands" d="M690.3 902.7l-.1-.3-.4-.2-.2-.1.1.2.1.3.1.2.2.1.2-.2zm5.5-1.3l-.1-.1h-.2l-.1.2.2.3.4.1-.2-.5zm-12.9-1.4l-.1.2-.4.1.2.3.6.4h.4l.1-.3-.1-.6h-.3l-.4-.1zm2.8-2l-.9-.3-.4-.3h-.3l.4.4.1.2.1.2.6.3.6.3.4.3-.1.1-.8.3h-.3l-.2.1.4.2.6-.1.2-.1h.2l.3.1v.2l-.1.2-.2.2-.4.3-.6.4h-.8l-.7.7.9.5.7.3h.9v-.1l.2-.1h.3l.1-.1.2-.4v-.6h.2l.3.1.7-.1.3-.1.6-.9.4-.8.2-.4.3-.2.1-.2.1-.3.3-.2v-.3l-.4-.2-.3-.2-.3.3-.2-.1-.9.3h-.4l-.3-.2-.4-.1-.4.1-.5.5-.8-.2zm.7-.4l.1-.3-.1-.2-.5-.2h-.5l.2.5.2.2h.6zm5.9-.7h-.4l.4.5-.8.8.2.6.3.4.1.2-.1.1-.4.1-.3.1-.2.3-.9.9.2.2-.3.7.2.3.8.7.8.4v-.7l.4-.1.4.2.4-.2-.9-1h.3l2.5.5-.1-.4-.1-.2-.3-.4 1.5-.4.5-.3.2-.3.6-.1.8-.3-.1-.1.1-.3-.4-.2-.5-.1.1-.3.5-.1-.8-.7-.3-.1-1 .1-.3.1v.2l.1.3.3.3.1.2-.2-.1-1.1-.4-.2-.1-.2-.4.2-.1.3.1.1-.3-.4-.3-.4-.1-.9.1-.8-.3z"/>
+<path class="map-country" id="FO" data-name="Faroe Islands" d="M947 186.9v-.3l-.1-.3v-.2h-.1l-.5-.1-.1-.2h-.1v.2l.1.4.5.4.3.2h.1l-.1-.1zm.5-2.1v-.1l-.2-.2-.5-.2-.2-.1-.2.1v.2l.1.1.4.1.4.3h.1l.1-.2zm-2.4-1.9l-.2-.1-.5.1h-.3l.1.3.6.2h.6l.2-.1-.1-.2-.4-.2zm2.5-.5l-.8-.2-.6-.3-1 .1.7 1.1.8.7.4.2V183.7l-.4-.5-.1-.1v-.1l.1-.1h.2l.3.2h.2l.2-.7zm1-.2l-.3-.2-.4-.4v.9h.1l.3.1.3-.4z"/>
+<path class="map-country" id="FR" data-name="France" d="M1025.7 303.8l-1.1-5.2-3.2 2.3-1 2.3 1.4 4.2 2.4 1.2 1.5-4.8zm-31.5-50.9l-2.4-2.4-2.2-.1-.7-2.2-4.3 1.2-1.4 5.1-11.3 4.8-4.6-2.6 1.4 7-8.2-1.6-6.4 1.3.4 4.6 7.5 2.4 3.6 3.1 5.1 6.5-1 12.3-2.7 3.7 2 2.4 9.4 2.8 1.9-1.3 5.7 2.8 6-.8.5-3.7 7.4-2 10 1.6 4.5-3.4.5-2.7-2.7-.8-1.5-4.8 1.7-1.8-1.6-2.4.2-1.7-1.8-2.7-2.4.9v-2.8l3.5-3.5-.2-1.6 2.3.6 1.3-1 .5-4.5 2.3-4.2-7.1-1.2-2.4-1.6-1.4.1-1.1-.5-4.4-2.8-2.5.4-3.4-2.9z"/>
+<path class="map-country" id="GA" data-name="Gabon" d="M1050.2 557.7l-.7-.3-3.4.8-3.4-.8-2.6.4v7.6h-8.2l-1.9.3-1.1 4.8-1.3 4.6-1.3 2-.2 2.1 3.4 6.6 3.7 5.3 5.8 6.4 4.3-3.5-2.1-4.2 1.9-1.6 3.8-.8.5-2.8 3 3 4.9.3 1.7-3 .8-4.3-.6-4.9-2.7-3.8 2.4-7.4-1.4-1.2-4.2.5-1.5-3.3.4-2.8z"/>
+<path class="map-country" id="GB" data-name="United Kingdom" d="M950 227.5l-4.9-3.7-3.9.3.8 3.2-1.1 3.2 2.9-.1 3.5 1.3 2.7-4.2zm13-24.3l-5.5.5-3.6-.4-3.7 4.8-1.9 6.1 2.2 3 .1 5.8 2.6-2.8 1.4 1.6-1.7 2.7 1 1.6 5.7 1.1h.1l3.1 3.8-.8 3.5-7.1-.6-1 4 2.6 3.3-5.1 1.9 1.3 2.4 7.5 1-4.3 1.3-7.3 6.5 2.5 1.2 3.5-2.3 4.5.7 3.3-2.9 2.2 1.2 8.3-1.7 6.5.1 4.3-3.3-1.9-3.1 2.4-1.8.5-3.9-5.8-1.2-1.3-2.3-2.9-6.9-3.2-1-4.1-7.1-.4-.6-4.8-.4 4.2-5.3 1.3-4.9h-5l-4.7.8 5-6.4z"/>
+<path class="map-country" id="GD" data-name="Grenada" d="M632.1 495.7l.5-.2.2-1.1-.3-.1-.3.3-.3.5v.4l-.2.3.4-.1z"/>
+<path class="map-country" id="GE" data-name="Georgia" d="M1200 300.2l-7.5-2.9-7.7-1-4.5-1.1-.5.7 2.2 1.9 3 .7 3.4 2.3 2.1 4.2-.3 2.7 5.4-.3 5.6 3 6.9-1 1.1-1 4.2 1.8 2.8.4.6-.7-3.2-3.4 1.1-.9-3.5-1.4-2.1-2.5-5.1-1.3-2.9 1-1.1-1.2z"/>
+<path class="map-country" id="GF" data-name="French Guiana" d="M681.4 556.2l1.8-4.7 3.5-5.8-.9-2.6-5.8-5.4-4.1-1.5-1.9-.7-3.1 5.5.4 4.4 2.1 3.7-1 2.7-.6 2.9-1.4 2.8 2.4 1.3 1.8-1.8 1.2.3.8 1.8 2.7-.5 2.1-2.4z"/>
+<path class="map-country" id="GH" data-name="Ghana" d="M976.8 502.1l-2.6-.5-1.8 1-2.4-.5-9.7.3-.2 3.6.8 4.8 1.4 9.1-2.3 5.3-1.5 7.2 2.4 5.5-.2 2.5 5 1.8 5-1.9 3.2-2.1 8.7-3.8-1.2-2.2-1.5-4-.4-3.2 1.2-5.7-1.4-2.3-.6-5.1.1-4.6-2.4-3.3.4-1.9z"/>
+<path class="map-country" id="GL" data-name="Greenland" d="M887.4 76.3l-26-.4-11.8.3-5 1.3-11.5-.1-12.7 2.1-1.6 1.7 6.7 2.1-6.2-1.3-4.5-.3-7-1.4-10.6 2.1-2.7-1.2h-10.4l-10.9.6-8.9 1-.2 1.8-5.3.5-14.6 2.9-4.6 1.7 8.1 1.5-2.8 1.6L730 95l-15.5 2.2-2.2 1.7 6.4 2 14.5 1.2-7.5.2-10.9 1.5 3.8 3.1 3 1.5 9.4-.3 10.1-.2 7.6.3 8 2.9-1.4 2.1 3.6 1.9 1.4 5.3 1 3.6 1.4 1.9-7 4.8 2.6 1.3 4.4-.8 2.6 1.8 5.3 3.4-7.5-1.4h-3.8l-3 2.8-1.5 3.6 4.2 1.8 4-.8 2.6-.8 5.5-1.9-2.8 4.2-2.6 2.3-7.1 2-7 6.3 2 2-3.4 4 3.7 5.2-1.5 5 .7 3.7 4.8 7.1.8 5.6 3.1 3.2h8.9l5 4.7 6.5-.3 4.1-5.7 3.5-4.8-.3-4.4 8.6-4.6 3.3-3.7 1.4-3.9 4.7-3.5 6.5-1.3 6.1-1.4 3-.2 10.2-3.9 7.4-5.7 4.8-2.1 4.6-.1 12.5-1.8 12.1-4.3 11.9-4.6-5.5-.3-10.6-.2 5.3-2.8-.5-3.6 4.2 3 2.7 2.1 7.3-1-.6-4.3-4.5-3.1-5-1.3 2.4-1.4 7.2 2.1.5-2.3-4.1-3.4h5.4l5.6-.8 1.7-1.8-4-2.1 8.6-.3-4-4.3 4.1-.5.1-4.2-6.2-2.5 6.4-1.6 5.8-.1-3.6-3.2 1.1-5.1 3.6-2.9 4.9-3.2-8-.2 11.3-.7 2.2-1 14.6-2.9-1.6-1.7-10-.8-16.9 1.5-9.2 1.5 4.5-2.3-2.3-1.4-7 1.2-9.7-1.4-12.1.5-1.4-.7 18.3-.4 12.9-.2 6.6-1.4-19.7-2.9z"/>
+<path class="map-country" id="GM" data-name="Gambia" d="M882.8 488.5l5 .1 1.4-.9h1l2.1-1.5 2.4 1.4 2.4.1 2.4-1.5-1.1-1.8-1.8 1.1-1.8-.1-2.1-1.5-1.8.1-1.3 1.5-6.1.2-.7 2.8z"/>
+<path class="map-country" id="GN" data-name="Guinea" d="M912.4 493l-.8.4-3-.5-.4.7-1.3.1-4-1.5-2.7-.1-.1 2.1-.6.7.4 2.1-.8.9h-1.3l-1.4 1-1.7-.1-2.6 3.1 1.6 1.1.8 1.4.7 2.8 1.3 1.2 1.5.9 2.1 2.5 2.4 3.7 3-2.8.7-1.7 1-1.4 1.5-.2 1.3-1.2h4.5l1.5 2.3 1.2 2.7-.2 1.8.9 1.7v2.3l1.5-.3 1.2-.2 1.5-.7 2.3 3.9-.4 2.6 1.1 1.3 1.6.1 1.1-2.6 1.6.2h.9l.3-2.8-.4-1.2.6-.9 2-.8-1.3-5.1-1.3-2.6.5-2.2 1.1-.5-1.7-1.8.3-1.9-.7-.7-1.2.6.2-2.1 1.2-1.6-2.3-2.7-.6-1.7-1.3-1.4-1.1-.2-1.3.9-1.8.8-1.6 1.4-2.4-.5-1.5-1.6-.9-.2-1.5.8h-.9l-.3-2.3z"/>
+<path class="map-country" id="GP" data-name="Guadeloupe" d="M636.4 471.1l.2-.2v-.3l-.2-.3-.2.1-.2.3v.3l.1.1h.3zm-1.9-.8l.2-.2v-1.2l.1-.3-.2-.1-.2-.2-.6-.2-.1.1-.2.3.1 1.5.2.5.2.1.5-.3zm1.6-1.4l.8-.2-.9-.6-.2-.4v-.3l-.4-.3-.2.2-.1.3.1.5-.3.4.1.4.4.1.7-.1z"/>
+<path class="map-country" id="GQ" data-name="Equatorial Guinea" d="M1040.1 557.8l-9.2-.2-1.9 7.2 1 .9 1.9-.3h8.2v-7.6z"/>
+<path class="map-country" id="GR" data-name="Greece" d="M1101.9 344.9l-.8 2.8 6.6 1.2v1.1l7.6-.6.5-1.9-2.8.8v-1.1l-3.9-.5-4.1.4-3.1-2.2zm11.5-37.4l-2.7-1.6.3 3-4.6.6-3.9-2.1-3.9 1.7-3.8-.2-1 .2-.7 1.1-2.8-.1-1.9 1.3-3.3.6v1.6l-1.6.9-.1 2.1-2.1 3 .5 1.9 2.9 3.6 2.3 3 1.3 4.3 2.3 5.1 4.6 2.9 3.4-.1-2.4-5.7 3.3-.7-1.9-3.3 5 1.7-.4-3.7-2.7-1.8-3.2-3 1.8-1.4-2.8-3-1.6-3.8.9-1.3 3 3.2h2.9l2.5-1-3.9-3.6 6.1-1.6 2.7.6 3.2.2 1.1-.7 1.2-3.9z"/>
+<path class="map-country" id="GT" data-name="Guatemala" d="M482.8 458.9l-5.1-.1h-5.2l-.4 3.6h-2.6l1.8 2.1 1.9 1.5.5 1.4.8.4-.4 2.1H467l-3.3 5.2.7 1.2-.8 1.5-.4 1.9 2.7 2.6 2.5 1.3 3.4.1 2.8 1.1.2-1 2.1-1.6 1.1-.7-.2-.7 1.4-.4 1.3-1.6-.3-1.3.5-1.2 2.8-1.8 2.8-2.4-1.5-.8-.6.9-1.7-1.1h-1.6l1.2-7.2.7-5z"/>
+<path class="map-country" id="GW" data-name="Guinea-Bissau" d="M900.2 492.1l-10.3-.3-1.5.7-1.8-.2-3 1.1.3 1.3 1.7 1.4v.9l1.2 1.8 2.4.5 2.9 2.6 2.6-3.1 1.7.1 1.4-1h1.3l.8-.9-.4-2.1.6-.7.1-2.1z"/>
+<path class="map-country" id="GY" data-name="Guyana" d="M656.1 534.2l-2.1-2.3-2.9-3.1-2.1-.1-.1-3.3-3.3-4.1-3.6-2.4-4.6 3.8-.6 2.3 1.9 2.3-1.5 1.2-3.4 1.1v2.9l-1.6 1.8 3.7 4.8 2.9-.3 1.3 1.5-.8 2.8 1.9.9 1.2 3-1.6 2.2-1 5.4 1.4 3.3.3 2.9 3.5 3 2.7.3.7-1.3 1.7-.2 2.6-1.1 1.8-1.7 3.1.5 1.4-.2-3.3-5.6-.7-3.5-1.8-.1-2.4-4.6 1.1-3.3-.3-1.5 3.5-1.6 1-5.7z"/>
+<path class="map-country" id="HK" data-name="Hong Kong SAR China" d="M1604.9 430.9v-.4l-.4-.2h-.3l.1.2.4.5.2-.1zm-1.3 0l-.1-.5.2-.3-.9.3-.1.3v.1l.2.1h.7zm1.6-1.2l-.1-.3-.2-.1-.1-.3-.1-.2-.3-.1-.2-.1h-.4l-.1.1h-.2l-.2.2v.2l-.5.4v.2l.3.2.5-.1.6.2.8.3v-.5l.2-.1z"/>
+<path class="map-country" id="HN" data-name="Honduras" d="M514.1 476.8l-1.3-1.8-1.9-1-1.5-1.4-1.6-1.2-.8-.1-2.5-.9-1.1.5-1.5.2-1.3-.4-1.7-.4-.8.7-1.8.7-2.6.2-2.5-.6-.9.4-.5-.6-1.6.1-1.3 1.1-.6-.2-2.8 2.4-2.8 1.8-.5 1.2.3 1.3-1.3 1.6 1.5.5 1.1 1.3 1.6 1 .1.9 2.5-.8 1.1.5.7.7-.6 2.5 1.7.6.7 2 1.8-.3.8-1.5h.8l.2-3.1 1.3-.2h1.2l1.4-1.7 1.5 1.3.6-.8 1.1-.7 2.1-1.8.3-1.3.5.1.8-1.5.6-.2.9.9 1.1.3 1.3-.8h1.4l2-.8.9-.9 1.9.2z"/>
+<path class="map-country" id="HR" data-name="Croatia" d="M1065 280.4l-4-2.6-1.6-.8-3.9 1.7-.3 2.5-1.7.6.2 1.7-2-.1-1.8-1-.8 1-3.5-.2-.2.1v2.2l1.7 2 1.3-2.6 3.3 1 .3 2 2.5 2.6-1 .5 4.6 4.5 4.8 1.8 3.1 2.2 5 2.3.5-1-4.7-2.4-2.2-2.5-2-1.4-2.5-2.3-1.3-1.9-2.7-2.9.9-2.5 1.9 1.4 1-1.3 2.3-.1 4.4 1 3.5-.1 2.4 1.4 1.7-2.3-1.7-1.8-1.5-2.4-1.8.9-4.2-1.2z"/>
+<path class="map-country" id="HT" data-name="Haiti" d="M580.6 446.7l-4.6-1-3.4-.2-1.4 1.7 3.4 1-.3 2.4 2.2 2.8-2.1 1.4-4.2-.5-5-.9-.7 2.1 2.8 1.9 2.7-1.1 3.3.4 2.7-.4 3.6 1.1.2-1.8-1.2-1.9 1.5-1.1.7-2.4-.2-3.5z"/>
+<path class="map-country" id="HU" data-name="Hungary" d="M1079.1 263.8l-1.6.4-1 1.5-2.2.7-.6-.4-2.3 1-1.9.2-.3 1.2-4.1.8-1.9-.7-2.6-1.6-.2 2.6h-2.8l1.1 1.3-1.3 4 .8.1 1.2 2.1 1.6.8 4 2.6 4.2 1.2 1.8-.9 3.7-1.6 3.2.2 3.8-1.1 2.6-4.3 1.9-4.2 2.9-1.3-.6-1.6-2.9-1.7-1 .6-5.5-1.9z"/>
+<path class="map-country" id="ID" data-name="Indonesia" d="M1651.9 637.3l.5-1.7-1.8-1.9-2.8-2-5.3 1.3 7 4.4 2.4-.1zm20.9-.6l4-4.8.1-1.9-.5-1.3-5.7 2.6-2.8 3.9-.7 2.1.6.8 5-1.4zm-35.6-13l-1.6 2.2-3.1.1-2.2 3.6 3 .1 3.9-.9 6.6-1.2-1.2-2.8-3.5.6-1.9-1.7zm28.1 0l-5.2 2.3-3.8.5-3.4-1.9-4.5 1.3-.2 2.3 7.4.8 8.6-1.8 1.1-3.5zm-79.5-8.4l-.7-2.3-2.3-.5-4.4-2.4-6.8-.4-4.1 6.1 5.1.4.8 2.8 10 2.6 2.4-.8 4.1.6 6.3 2.4 5.2 1.2 5.8.5 5.1-.2 5.9 2.5 6.6-2.4-6.6-3.8-8.3-1.1-1.8-4.1-10.3-3.1-1.3 2.6-10.7-.6zm146.6-3.6l.2-3-1.2-1.9-1.3 2.2-1.2 2.2.3 4.8 3.2-4.3zm-41-17.5l-1.4-2.1-5.7.3 1 2.7 3.9 1.2 2.2-2.1zm18.1-2.4l-6.1-1.8-6.9.3-1.5 3.5 3.9.2 3.2-.4 4.6.5 4.7 2.6-1.9-4.9zm21-12.3l-.8-2.4-9-2.6-2.9 2.1-7.6 1.5 2.3 3.2 5 1.2 2.1 3.7 8.3.1.4 1.6-4-.1-6.2 2.3 4.2 3.1-.1 2.8 1.2 2.3 2.1-.5 1.8-3.1 8.2 5.9 4.6.5 10.6 5.4 2.3 5.3 1 6.9-3.7 1.8-2.8 5.2 7.1-.2 1.6-1.8 5.5 1.3 4.6 5.2 1.5-20.8 1-20.7-6-1.2-4.1-2.3-4.7-2.2h-5l-6.6 3.8-4.9 6.8-5.7-3.8-1.3-10.3zm-50-16.4l-1-1.4-5.5 4.6-6.5.3-7.1-.9-4.4-1.9-4.7 4.8-1.2 2.6-2.9 9.6-.9 5-2.4 4.2 1.6 4.3 2.3.1.6 6.1-1.9 5.9 2.3 1.9 3.6-1 .3-9.1-.2-7.4 3.8-1.9-.7 6.2 3.9 3.7-.8 2.5 1.3 1.7 5.6-2.4-3 5.2 2.1 2.2 3.1-1.9.3-4.1-4.7-7.4 1.1-2.2-5.1-8.1 5-2.5 2.6-3.7 2.4.9.5-2.9-10.5 2.1-3.1 2.9-5-5.6.9-4.8 4.9-1 9.3-.3 5.4 1.3 4.3-1.3 4.4-6.3zm19.4 1.9l-.6-2.6-3.3-.6-.5-3.5-1.8 2.3-1 5.1 1.7 8.2 2.2 4 1.6-.8-2.3-3.3.9-3.9 2.9.6.2-5.5zm-60.9-4.5l.9-2.9-4.3-6 3-5.8-5-1h-6.4l-1.7 7.2-2 2.2-2.7 8.9-4.5 1.3-5.4-1.8-2.7.6-3.2 3.2-3.6-.4-3.6 1.2-3.9-3.5-1-4.3-3.3 4.2-.6 5.9.8 5.6 2.6 5.4 2.8 1.8.7 8.5 4.6.8 3.6-.4 2 3.1 6.7-2.3 2.8 2 4 .4 2 3.9 6.5-2.9.8 2.3 2.5-9.7.3-6.4 5.5-4.3-.2-5.8 1.8-4.3 6.7-.8-6.5-5.9zm-68.7 48.9l.7-9.8 1.7-8-2.6-4-4.1-.5-1.9-3.6-.9-4.4-2-.2-3.2-2.2 2.3-5.2-4.3-2.9-3.3-5.3-4.8-4.4-5.7-.1-5.5-6.8-3.2-2.7-4.5-4.3-5.2-6.2-8.8-1.2-3.6-.3.6 3.2 6.1 7 4.4 3.6 3.1 5.5 5.1 4 2.2 4.9 1.7 5.5 4.9 5.3 4.1 8.9 2.7 4.8 4.1 5.2 2.2 3.8 7 5.2 4.5 5.3 6.2-.1z"/>
+<path class="map-country" id="IE" data-name="Ireland" d="M947.3 231.7l-3.5-1.3-2.9.1 1.1-3.2-.8-3.2-3.7 2.8-6.7 4.7 2.1 6.1-4.2 6.4 6.7.9 8.7-3.6 3.9-5.4-.7-4.3z"/>
+<path class="map-country" id="IL" data-name="Israel" d="M1167.8 360.5l-1.4.1-.4 1.1h-1.8l-.1.1-.6 1.6-.6 4.8-1.1 2.9.4.4-1.4 2.1 3.9 9.2.7 1.7 1.7-10.2-.4-2.4-2.4.8.1-1.7 1.2-.8-1.4-.7.7-4.3 2 .9.7-2h-.1l.6-1-.3-2.6z"/>
+<path class="map-country" id="IN" data-name="India" d="M1414.1 380.1l-8.5-4.4-6.2-4-3.2-7 4.1.9-.6-3.3-3-3.3-.8-5.2-7.6-7.5-3.7 5.4-5.7 1-8.5-1.6-1.9 2.8 3.2 5.6 2.9 4.3 5 3.1-3.7 3.7 1 4.5-3.9 6.3-2.1 6.5-4.5 6.7-6.4-.5-4.9 6.6 4 2.9 1.3 4.9 3.5 3.2 1.8 5.5h-12l-3.2 4.2 7.1 5.4 1.9 2.5-2.4 2.3 8 7.7 4 .8 7.6-3.8 1.7 5.9.8 7.8 2.5 8.1 3.6 12.3 5.8 8.8 1.3 3.9 2 8 3.4 6.1 2.2 3 2.5 6.4 3.1 8.9 5.5 6 2.2-1.8 1.7-4.4 5-1.8-1.8-2.1 2.2-4.8 2.9-.3-.7-10.8 1.9-6.1-.7-5.3-1.9-8.2 1.2-4.9 2.5-.3 4.8-2.3 2.6-1.6-.3-2.9 5-4.2 3.7-4 5.3-7.5 7.4-4.2 2.4-3.8-.9-4.8 6.6-1.3 3.7.1.5-2.4-1.6-5.2-2.6-4.8.4-3.8-3.7-1.7.8-2.3 3.1-2.4-4.6-3.4 1.2-4.3 4.8 2.7 2.7.4 1.2 4.4 5.4.9 5-.1 3.4 1.1-1.6 5.3-2.4.4-1.1 3.6 3.5 3.3.2-4 1.5-.1 4.5 10.1 2.4-1.5-.9-2.7.9-2.1-.9-6.6 4.6 1.4 1.5-5.2-.3-3.1 2.1-5.4-.9-3.6 6.1-4.4 4.1 1.1-1.3-3.9 1.6-1.2-.9-2.4-6.1-.9 1.2-2.7-3.5-3.9-3.2 2.6-4.9-1.5-5.3 4-3.9 4.8-4.2.8 2.7 2 .4 3.9-4.4.2-4.7-.4-3.2 1-5.5-2.5-.3-1.2-1.5-5.1-3 1.4.1 2.7 1.5 4.1-.1 2.5-4.6.1-6.8-1.5-4.3-.6-3.8-3.2-7.6-.9-7.7-3.5-5.8-3.1-5.7-2.5.9-5.9 2.8-2.9z"/>
+<path class="map-country" id="IQ" data-name="Iraq" d="M1207.3 334.9l-6.2-.9-2.1 1-2.1 4.1-2.7 1.6 1.2 4.7-.9 7.8-11 6.7 3.1 7.7 6.7 1.7 8.5 4.5 16.7 12.7 10.2.5 3.2-6.1 3.7.5 3.2.4-3.4-3.4-.5-3.3h-1.7l.2-4.6-3.5-4.9-7-3.4-4.6-6.1.5-5 2.3-2.2-1-3.8-3.7-1.9-4.7-7.8-2.3 1.1-2.1-1.6z"/>
+<path class="map-country" id="IR" data-name="Iran" d="M1213.5 324.4l-3.2-2.9-1.2-2.4-3.3 1.8 2.9 7.3-.7 2 3.7 5.2 4.7 7.8 3.7 1.9 1 3.8-2.3 2.2-.5 5 4.6 6.1 7 3.4 3.5 4.9-.2 4.6h1.7l.5 3.3 3.4 3.4 1.7-2.5 3.7 2.1 2.8-1 5.1 8.4 4.3 6.1 5.5 1.8 6.1 4.9 6.9 2.1 5.1-3.1 4-1.1 2.8 1.1 3.2 7.8 6.3.8 6.1 1.5 10.5 1.9 1.2-7.4 7.4-3.3-.9-2.9-2.7-1-1-5.7-5.6-2.7-2.8-3.9-3.2-3.3 3.9-5.8-1.1-4-4.3-1.1-1.1-4-2.7-5.1 1.6-3.5-2.5-.9.5-4.7.5-8-1.6-5.5-3.9-.2-7.3-5.7-4.3-.7-6.5-3.3-3.8-.6-2.1 1.2-3.5-.2-3 3.7-4.4 1.2-.2 1.6-7.9 1.7-7.6-1.1-4.3-3.3-5.2-1.3-2.5-4.8-1.3.3-3.8-3.4 1.2-3.1-1.9-1.9-1.9.5-5.3 4.7-1.8.2-3.7-.9z"/>
+<path class="map-country" id="IS" data-name="Iceland" d="M915.7 158.6l-6.9-.4-7.3 2.9-5.1-1.5-6.9 3-5.9-3.8-6.5.8-3.6 3.7 8.7 1.3-.1 1.6-7.8 1.1 8.8 2.7-4.6 2.5 11.7 1.8 5.6.8 3.9-1 12.9-3.9 6.1-4.2-4.4-3.8 1.4-3.6z"/>
+<path class="map-country" id="IT" data-name="Italy" d="M1057.8 328.6l-4 .5-5.2.7-6.2-.6-.6 3.4 7.5 3.3 2.7.7 4.2 2.4.9-3.3-.9-2 1.6-5.1zm-33.7-18.9l-2.5 1.9-2.8-.3 1.3 3.6.4 7.6 2.1 1.7 2-2.1 2.4.4.4-8.4-3.3-4.4zm14.3-34.3l-1.3-2.2-4.8 1.1-.5 1.2-3.1-.9-.3 2.5-2.1 1.1-3.8-.8-.9 2.5-2.4.2-.9-1-2.7 2.1-2.4.3-2.2-1.3-.2 1.7 1.6 2.4-1.7 1.8 1.5 4.8 2.7.8-.5 2.7 2.1-.5 2.8-2.8 2.3-.9 4.2 2.1 2.6.7 1.9 6 3.6 3.6 4.9 4 4.2 2.8 3.9.4 2.3 2.5 3.4 1.2 1.7 2.7 2.2.8 1.8 3.2 2.3 3.7-1.1 1.3-.8 3.5.1 2 2.1-.5 2.5-5.6 2.1-.4.4-3.3-3.9-2.3 1.9-4.1 4.5 1 3.1 3 .8-2.3-.6-1.2-4.7-3.2-3.9-1.9-4.8-2.3 1.4-1.2-1.4-1.4-4 .1-6-5-2.9-5.1-4.9-3.1-1.9-3.1.5-1.8-.4-3 3.9-2.2 4.1.9-1.4-2.7.3-3-7.2-1.6z"/>
+<path class="map-country" id="JM" data-name="Jamaica" d="M550.7 458.5l3.9-.1-.8-1.8-2.7-1.5-3.7-.6-1.2-.2-2.4.4-.8 1.5 2.9 2.3 3 1 1.8-1z"/>
+<path class="map-country" id="JO" data-name="Jordan" d="M1186.6 367.6l-3.1-7.7-9.6 6.7-6.3-2.5-.7 2 .4 3.9-.6 1.9.4 2.4-1.7 10.2.3.9 6.1 1 2.1-2 1.1-2.3 4-.8.7-2.2 1.7-1-6.1-6.4 10.4-3.1.9-1z"/>
+<path class="map-country" id="JP" data-name="Japan" d="M1692.5 354.9l-4.5-1.3-1.1 2.7-3.3-.8-1.3 3.8 1.2 3 4.2 1.8-.1-3.7 2.1-1.5 3.1 2.1 1.3-3.9-1.6-2.2zm24.4-19.3l-3.6-6.7 1.3-6.4-2.8-5.2-8.1-8.7-4.8 1.2.2 3.9 5.1 7.1 1 7.9-1.7 2.5-4.5 6.5-5-3.1v11.5l-6.3-1.3-9.6 1.9-1.9 4.4-3.9 3.3-1.1 4-4.3 2 4 4.3 4.1 1.9.9 5.7 3.5 2.5 2.5-2.7-.8-10.8-7.3-4.7 6.1-.1 5-3 8.6-1.4 2.4 4.8 4.6 2.4 4.4-7.3 9.1-.4 5.4-3 .6-4.6-2.5-3.2-.6-5.2zm-11.8-44.2l-5.3-2.1-10.4-6.4 1.9 4.8 4.3 8.5-5.2.4.6 4.7 4.6 6.1h5.7l-1.6-6.8 10.8 4.2.4-6.1 6.4-1.7-6-6.9-1.7 2.6-4.5-1.3z"/>
+<path class="map-country" id="KE" data-name="Kenya" d="M1211.7 547.2h-3.8l-2.3-2.1-5.1 2.6-1.6 2.7-3.8-.5-1.2-.7-1.3.1h-1.8l-7.2-5.4h-3.9l-2-2.1v-3.6l-2.9-1.1-3.8 4.2-3.4 3.8 2.7 4.4.7 3.2 2.6 7.3-2.1 4.7-2.7 4.2-1.6 2.6v.3l1.4 2.4-.4 4.7 20.2 13 .4 3.7 8 6.3 2.2-2.1 1.2-4.2 1.8-2.6.9-4.5 2.1-.4 1.4-2.7 4-2.5-3.3-5.3-.2-23.2 4.8-7.2z"/>
+<path class="map-country" id="KG" data-name="Kyrgyzstan" d="M1387.2 302.6l-3.5-.9-3.3-2.2-7.8-.6-8.6-.2-1.6.7-8.1-2.6-2.5 1.3.5 3.6-9.1-2.1-3.1.8-.3 2.7 1.8.6-3.1 4.1 4.6 2.3 3.2-1.6 7.1 3.3-5.2 4.5-4.1-.6-1.4 2-5.9-1.1.6 3.7 5.4-.5 7.1 2 9.5-.9 1-1.5-1.1-1.5 4-3 3.2-1.2 5.7.9.6-4 6.4-.8 1-2.4 6.8-3.4.2-1.4z"/>
+<path class="map-country" id="KH" data-name="Cambodia" d="M1574.8 481.8l-5.2-2.3-2 4.3-4.9-2.4-5.3-1-7.1 1.3-3 5.2 2.1 7.7 3.4 6.6 2.6 3.3 4.7.9 4.7-2.5 5.8-.5-2.8-3.8 8.9-4.9-.1-7.7-1.8-4.2z"/>
+<path class="map-country" id="KM" data-name="Comoros" d="M1221.1 650.5l-.4-.4h-.4v.2l.1.4 1.1.2-.4-.4zm3.9-1.5h-.1l-.2.1-.1.2-.1.3h-.9l.8.5.5.5.2.2.1-.2.1-.7-.3-.9zm-5.6-1.1l.2-.3-.2-.7-.4-.8.1-1.4-.2-.2h-.3l-.1.1-.1.3-.3 2 .4.6.3.1.5.4.1-.1z"/>
+<path class="map-country" id="KN" data-name="St. Kitts &amp; Nevis" d="M629.9 463.2v-.3l-.2-.2h-.3v.5l.2.2.3-.2zm-.5-.7l-.1-.2-.1-.1-.2-.4-.4-.4-.2.1-.1.2v.1l.3.3.4.1.2.4.2-.1z"/>
+<path class="map-country" id="KP" data-name="North Korea" d="M1644.7 302.3l-5.5-3.6.1 3.5-6.3 2.6 2.7 3.3-4.6-.2-3.6-2-1 4.4-3.8 3.4-2.1 4 3.3 1.7 3.4.7.8 1 .4 3.5 1.1 1.2-.9.7-.1 2.9 1.9 1 1.6.6.8 1.2 1.3-.5v-1.3l3.1 1.3.1-.6 2.4.2.7-2.9 3.5-.3 2.1-.4-.1-1.6-4.3-2.8-2.6-1 .2-.7-1.2-2.8 1.3-1.7 2.9-1 1-1.9.3-1.1 1.9-1.4-2.8-4.5.3-2.1.9-2 2.2.3-1.4-1.1z"/>
+<path class="map-country" id="KR" data-name="South Korea" d="M1637.3 331.7l6.2 5.5-3.4 1.1 5.2 6.8 1.1 4.8 2.1 3.5 4.5-.5 3.2-2.7 4.2-1.2.5-3.6-3.4-7.5-3.3-4.2-8.2-7.6.1 1.6-2.1.4-3.5.3-.7 2.9-2.4-.2-.1.6z"/>
+<path class="map-country" id="KW" data-name="Kuwait" d="M1235.6 381.4l-3.7-.5-3.2 6.1 4.9.6 1.7 3.1 3.8-.2-2.4-4.8.3-1.5-1.4-2.8z"/>
+<path class="map-country" id="KY" data-name="Cayman Islands" d="M527 449.1l-.1-.3-.1.1v.6h.7l.3-.2h.6l-.1-.2-.8-.1-.1.1-.2.1-.2-.1zm8-2.3l-.1-.1h-.1l-.3.1h-.2l-.1.1-.1.1h.2l.4-.2H535zm.8-.1l.5-.2-.1-.1h-.1l-.1.1h-.1l-.5.3h.2l.2-.1z"/>
+<path class="map-country" id="KZ" data-name="Kazakhstan" d="M1308.8 223.8l-9-1.3-3.1 2.5-10.8 2.2-1.7 1.5-16.8 2.1-1.4 2.1 5 4.1-3.9 1.6 1.5 1.7-3.6 2.9 9.4 4.2-.2 3-6.9-.3-.8 1.8-7.3-3.2-7.6.2-4.3 2.5-6.6-2.4-11.9-4.3-7.5.2-8.1 6.6.7 4.6-6-3.6-2.1 6.8 1.7 1.2-1.7 4.7 5.3 4.3 3.6-.2 4.2 4.1.2 3.2 2.8 1 4.4-1.3 5-2.7 4.7 1.5 4.9-.3 1.9 3.9.6 6-4.6-.9-4 1 .9 4.5-5-.6.6 2 3.2 1.6 3.7 5.5 6.4 2.1 1.5 2.1-.7 2.6.7 1.5 1.8-2 5.5-1.3 3.8 1.7 4.9 4.9 2.5-.3-6.2-22.8 11.9-3.6 1.1.5 9.1 4.5 4.8 2.3 6.5 5.5 5.7-.9 8.6-.5 7.5 4.5 1.5 6.2 2.5.1 2.6 5 6.6.2 2.3 3h1.9l.9-4.5 5.4-4.3 2.5-1.2.3-2.7 3.1-.8 9.1 2.1-.5-3.6 2.5-1.3 8.1 2.6 1.6-.7 8.6.2 7.8.6 3.3 2.2 3.5.9-1.7-3.5 2.9-1.6-8.7-10.7 9-2.4 2-1.4-1-11.1 10.7 2 1.6-2.8-2.5-6.2 3.8-.6 1.8-4.2-4.3-3.8-6 .9-3.3-2.6-3.9-1.2-4.1-3.6-3.2-1.1-6.2 1.6-8.3-3.6-1.1 3.3-18.1-15.5-8.3-4.7.8-1.9-9.1 5.7-4.4.4-1.2-3.3-7-2.1-4.3 1.5-4.3-6.3z"/>
+<path class="map-country" id="LA" data-name="Laos" d="M1574.8 481.8l.2-6.4-2-4.5-4.8-4.4-4.3-5.6-5.7-7.5-7.3-3.8 1.3-2.3 3.3-1.7-3-5.5-6.8-.1-3.4-5.7-4-5.1-2.7 1 1.9 7.2-2.9-.1-.7-1.5-4.1 4.1-.8 2.4 2.6 1.9.9 3.8 3.8.3-.4 6.7 1 5.7 5.3-3.8 1.8 1.2 3.2-.2.8-2.2 4.3.4 4.9 5.2 1.3 6.3 5.2 5.5.5 5.4-1.5 2.9 4.9 2.4 2-4.3 5.2 2.3z"/>
+<path class="map-country" id="LB" data-name="Lebanon" d="M1167.8 360.5l.9-3.5 2.6-2.4-1.2-2.5-2.4-.3-.1.2-2.1 4.5-1.3 5.2h1.8l.4-1.1 1.4-.1z"/>
+<path class="map-country" id="LC" data-name="St. Lucia" d="M637.4 484.2l.1-1.2-.1-.5-.2.1-.3.4-.4.6-.1.3v.6l.6.4.4-.7z"/>
+<path class="map-country" id="LI" data-name="Liechtenstein" d="M1024.4 273.6v-.2l.1-.2-.1-.1-.1-.2-.1-.1v-.2l-.1-.1v-.2l-.1-.1-.2.6v.5l.1.2h.1l.4.1z"/>
+<path class="map-country" id="LK" data-name="Sri Lanka" d="M1432.2 532.7l2.3-1.8.6-6.6-3-6.6-2.9-4.5-4.1-3.5-1.9 10.3 1.4 9.1 2.8 5.1 4.8-1.5z"/>
+<path class="map-country" id="LR" data-name="Liberia" d="M929.4 523.3l-1.6-.2-1.1 2.6-1.6-.1-1.1-1.3.4-2.6-2.3-3.9-1.5.7-1.2.2-2.6 3-2.6 3.4-.3 1.9-1.3 2 3.7 4.1 4.8 3.5 5.1 4.8 5.7 3.1 1.5-.1.5-5.2.5-.8-.2-2.5-2.3-2.7-1.8-.4-1.6-1.8 1.2-2.8-.6-3.1.3-1.8z"/>
+<path class="map-country" id="LS" data-name="Lesotho" d="M1128.1 766.5l1.1-2 3.1-1 1.1-2.1 1.9-3.1-1.7-1.9-2.3-2-2.6 1.3-3.1 2.5-3.2 4 3.7 4.9 2-.6z"/>
+<path class="map-country" id="LT" data-name="Lithuania" d="M1100.4 221.2l-5-2.9-2.5-.4-.9-1.3-4.4.6-7.9-.4-5 1.9 1.7 5 5 1.1 2.2.9-.2 1.7.6 1.5 2.5.6 1.4 1.9h4.6l4.8-2.2.5-3.4 3.5-2-.9-2.6z"/>
+<path class="map-country" id="LU" data-name="Luxembourg" d="M1007 258.6l.2-2.7-1-1.4-1.3.2-.4 3.5 1.1.5 1.4-.1z"/>
+<path class="map-country" id="LV" data-name="Latvia" d="M1102.1 210.1h-3.8l-4.4-2.2-2.1-.7-3.7 1-.2 4.6-3.6.1-4.4-4.5-4 2.1-1.7 3.7.5 4.5 5-1.9 7.9.4 4.4-.6.9 1.3 2.5.4 5 2.9 2.6-1 4.6-2.3-2.1-3.6-1-2.8-2.4-1.4z"/>
+<path class="map-country" id="LY" data-name="Libya" d="M1111.8 371.4l-1.5-2.1-5.4-.8-1.8-1.1h-2l-2-2.8-7.3-1.3-3.6.8-3.7 3-1.5 3.1 1.5 4.8-2.4 3-2.5 1.6-5.9-3.1-7.7-2.7-4.9-1.2-2.8-5.7-7.2-2.8-4.5-1.1-2.2.6-6.4-2.2-.1 4.9-2.6 1.8-1.5 2-3.7 2.5.7 2.6-.4 2.7-2.6 1.4 1.9 5.6.4 3-.9 5.2.5 2.9-.6 3.5.5 4-2.1 2.6 3.4 4.7.2 2.7 2 3.6 2.6-1.2 4.3 2.9 2.5 4 8.8 2.8 3.1 3.5 3.9-2.4 5.4-3.5 22.3 12.2 22.4 12.2v-2.7h6.3l-.5-12.7-1-23.4-1.3-22.7-2-5.1 1.2-3.9-1.1-2.7 1.8-3z"/>
+<path class="map-country" id="MA" data-name="Morocco" d="M965.2 348.4l-2.3-.1-5.5-1.4-5 .4-3.1-2.7h-3.9l-1.8 3.9-3.7 6.7-4 2.6-5.4 2.9-3.5 4.3-.9 3.4-2.1 5.4 1.1 7.9-4.7 5.3-2.7 1.7-4.4 4.4-5.1.7-2.8 2.4-.1.1-3.6 6.5-3.7 2.3-2.1 4-.2 3.3-1.6 3.8-1.9 1-3.1 4-2 4.5.3 2.2-1.9 3.3-2.2 1.7-.3 3h.1l12.4-.5.7-2.3 2.3-2.9 2-8.8 7.8-6.8 2.8-8.1 1.7-.4 1.9-5 4.6-.7 1.9.9h2.5l1.8-1.5 3.4-.2-.1-3.4h.8l.1-7.5 8.9-4.7 5.4-1 4.4-1.7 2.1-3.2 6.3-2.5.3-4.7 3.1-.5 2.5-2.4 7-1 1-2.5-1.4-1.4-1.8-6.7-.3-3.9-2-4.1z"/>
+<path class="map-country" id="MD" data-name="Moldova" d="M1118.5 283.3l1.2-.7.5-2.1 1.1-2-.5-1.1 1-.5.6.9 3 .2 1.2-.5-1-.6.2-1-2-1.5-1.1-2.6-1.9-1.1v-2.1l-2.5-1.6-2-.3-3.9-1.9-3.2.6-1.1.9 1.6.6 1.8 1.9 1.9 2.6 3.4 3.7.6 2.7-.2 2.7 1.3 2.8z"/>
+<path class="map-country" id="ME" data-name="Montenegro" d="M1080 299.8l.4-.6-2-1.2-1.8-.7-.8-.8-1.5-1.1-.9.6-1.5 1.4-.4 3.4-.5 1 2.3 1.2 1.6 2.1 1.1.4-.5-1.9 2-3.1.4 1.2 1.3-.5.8-1.4z"/>
+<path class="map-country" id="MG" data-name="Madagascar" d="M1255.7 658.4l-1.1-4.2-1.4-2.7-1.8-2.7-2 2.8-.3 3.8-3.3 4.5-2.3-.8.6 2.7-1.8 3.2-4.8 3.9-3.4 3.7h-2.4l-2.2 1.2-3.1 1.3-2.8.2-1 4.1-2.2 3.5.1 5.9.8 4 1.1 3-.8 4.1-2.9 4.8-.2 2.1-2.6 1.1-1.3 4.6.2 4.6 1.6 5-.1 5.7 1.2 3.3 4.2 2.3 3 1.7 5-2.7 4.6-1.5 3.1-7.4 2.8-8.9 4.3-12 3.3-8.8 2.7-7.4.8-5.4 1.6-1.5.7-2.7-.8-4.7 1.2-1.9 1.6 3.8 1.1-1.9.8-3.1-1.3-2.9-.5-7.7z"/>
+<path class="map-country" id="MK" data-name="North Macedonia" d="M1094 304.8l-2.8-2-2.4.1-1.7.4-1.1.2-2.9 1-.1 1.2h-.7l-.4 2.1.9 2.6 2.3 1.6 3.3-.6 1.9-1.3 2.8.1.7-1.1 1-.2-.8-4.1z"/>
+<path class="map-country" id="ML" data-name="Mali" d="M1000.3 450.3l-6.1.6-.1-4-2.6-1.1-3.4-1.8-1.3-3-18.6-13.8-18.4-13.9-8.4.1 2.4 27.4 2.4 27.5 1 .8-1.3 4.4-22.3.1-.9 1.4-2.1-.4-3.2 1.3-3.8-1.8-1.8.2-1 3.7-1.9 1.2.2 3.9 1.1 3.7 2.1 1.8.4 2.4-.3 2 .3 2.3h.9l1.5-.8.9.2 1.5 1.6 2.4.5 1.6-1.4 1.8-.8 1.3-.9 1.1.2 1.3 1.4.6 1.7 2.3 2.7-1.2 1.6-.2 2.1 1.2-.6.7.7-.3 1.9 1.7 1.8.7-.6 1.6 1 4.3.1 1-1.9 1 .1 1.6-.7.9 2.7 1.3-.8 2.3-.9-.4-3.7 1.6-2.7-.2-2.2 4.5-5.2.8-4.4 1.6-1.6 2.7.9 2.3-1.3.8-1.6 4.3-2.9 1.1-2 5.2-2.6 3-.9 1.4 1.2h3.6l3.6-.3 2-2.2 7.6-.6 4.9-1 .5-3.9 3-4.3-.1-14.6z"/>
+<path class="map-country" id="MM" data-name="Myanmar (Burma)" d="M1533.9 435.8l-.6-2.6-3.8 1.8-2.5-1.2-4.5-2.4.8-5.2-3.7-1.3-2.3-5.8-5.6 1-.7-7.5 4.1-5.3-.8-5.3-1.3-4.9-2.7-1.5-2.7-3.7-3 .4.9 2.4-1.6 1.2 1.3 3.9-4.1-1.1-6.1 4.4.9 3.6-2.1 5.4.3 3.1-1.5 5.2-4.6-1.4.9 6.6-.9 2.1.9 2.7-2.4 1.5.5 4.6-2.1-1 1.1 5.1 4.6 5.2 3.4.9-.4 2.2 5.4 7.4 1.9 5.9-.9 7.9 3.6 1.5 3.2.6 5.8-4.6 3.2-3.1 3.1 5.2 2 8.1 2.6 7.6 2.6 3.3.2 6.9 2.2 3.8-1.3 4.8.9 4.8 2.2-6.6 2.6-5.9-2.8-5.8-.2-3-1-3.5-4.2-5.1-1.7-3.2 1.7-1.1 1.4-5.6-2.9-4.2-4.1-4.6-3.5-5.6 2.2-1.1 1.5-6.9 3.9-.3 2.8-2.8 3-1.4.8-2.4 4.1-4.1z"/>
+<path class="map-country" id="MN" data-name="Mongolia" d="M1473.7 252.1l-3.7-4.6-6.6-1.5-4.8-.8-6.9-2.5-1.3 6.4 4 3.6-2.4 4.3-7.9-1.6-5-.2-4.7-2.9-5.1-.1-5.3-1.9-5.9 2.9-6.6 5.4-4.7 1 3.3 4.4 5.7 3.3 8.1 2.3 5.8 5 1.3 7.3 3 2.7 6.4 1 7.2.9 7.9 3.8 3.4.7 4.9 5.7 4.7 3.6 5.5-.1 11.2 1.3 6.4-.8 5.5.9 9.3 3.8 6.2-.1 3.2 2 4.4-3.3 7.2-2.2 7.5-.2 4.9-2.2 1.9-3.3 2.5-2-1.9-2.1-2.9-2.3.4-4 3.2.5 5.9 1.3 3.1-3.3 6.3-2.4 1.4-4.1 2.4-1.8 6.8-.8 4.3.7-.7-2.2-7.2-4.3-5.1-2-2.5 2.3-5.4-1-2.4.8-2.7-2.6-.3-6.2-.6-4.6-5.5.5-3.9-2.1-3.3-.7-4.5 4.4-5.8 1-3.6 1.6-6.7-1h-4.5l-4.9-3.1-6.5-3-5.4-.8-5.7.8-3.9 1.1-8.4-2.6z"/>
+<path class="map-country" id="MQ" data-name="Martinique" d="M638 479.9l-.2-.7-.1-.2-.2-.3.1-.3v-.1h-.2l-.3-.5-.6-.3h-.3l-.2.2v.3l.3.9.2.2.5.2-.4.4v.1l.1.3h.9l.2.3.1-.1.1-.4z"/>
+<path class="map-country" id="MR" data-name="Mauritania" d="M949.8 413.3l-20.3-15.5-.2 9.7-17.9-.3-.2 16.3-5.2.5-1.4 3.3.9 9.2-21.6-.1-1.2 2.2 2.8 2.7 1.4 3-.7 3.2.6 3.2.5 6.3-.8 5.9-1.7 3.2.4 3.4 2-2 2.7.5 2.8-1.4h3.1l2.6 1.8 3.7 1.7 3.2 4.7 3.6 4.4 1.9-1.2 1-3.7 1.8-.2 3.8 1.8 3.2-1.3 2.1.4.9-1.4 22.3-.1 1.3-4.4-1-.8-2.4-27.5-2.4-27.4 8.4-.1z"/>
+<path class="map-country" id="MS" data-name="Montserrat" d="M631.8 465.7l-.1-.5h-.1l-.2.4v.3l.3.1.1-.3z"/>
+<path class="map-country" id="MT" data-name="Malta" d="M1053.6 344l-.2-.2-.5-.5-.5-.1.1.6.4.4h.5l.2-.2zm-1.4-1.2v-.2l-.3-.1-.4.1.1.1.3.2.3-.1z"/>
+<path class="map-country" id="MU" data-name="Mauritius" d="M1294.7 702.5l.3-.3.2-.4.3-.3.1-.7-.2-.8-.4-.7-.5.1-.3.4-.2.5-.5.3-.1.3-.2.7-.1.4-.2.1v.2l.3.3.8.1.7-.2z"/>
+<path class="map-country" id="MV" data-name="Maldives" d="M1389.1 551.6l.1-.1v-.2l-.1-.1h-.1l-.1.2v.2h.2zm.3-5.9l.1-.2v-.4l-.1.1-.1.2v.1l-.1.1v.1h.2z"/>
+<path class="map-country" id="MW" data-name="Malawi" d="M1169.2 661.5l.1-2.3-1.2-1.9.1-2.8-1.5-4.7 1.7-3.5-.1-7.7-1.9-4.1.2-.7-1.1-1.7-5.4-1.2 2.6 2.8 1.2 5.4-1 1.8-1.2 5.1.9 5.3-1.8 2.2-1.9 5.9 2.9 1.7 3 3 1.6-.6 2.1 1.6.3 2.6-1.3 2.9.2 4.5 3.4 4 1.9-4.5 2.5-1.3-.1-8.2-2.2-4.6-1.9-2h-.3v.8l1.1.3 1 3.4-.2.8-1.9-2.5-1 1.6-.8-1.4z"/>
+<path class="map-country" id="MX" data-name="Mexico" d="M444.4 407.8l-3.6-1.4-3.9-2-.8-3-.2-4.5-2.4-3.6-1-3.7-1.6-4.4-3.1-2.5-4.4.1-4.8 5-4-1.9-2.2-1.9-.4-3.5-.8-3.3-2.4-2.8-2.1-2-1.3-2.2h-9.3l-.8 2.6h-15l-10.7-4.4-7.1-3.1 1-1.3-7 .7-6.3.5.2 5.7.7 5.1.7 4.1.8 4 2.6 1.8 2.9 4.5-1 2.9-2.7 2.3-2.1-.3-.6.5 2.3 3.7 2.9 1.5 1 1.7.9-.9 3.1 2.9 2.1 2 .1 3.4-1.2 4.7 2.5 1.6 3.3 3.1 2.9 3.6.7 3.9h1l2.7-2.3.4-1.2-1.5-2.8-1.6-2.9-2.6-.2.4-3.4-.9-3-1-2.8-.5-5.9-2.6-3.2-.6-2.3-1.2-1.6v-4.1l-1 .1-.1-2.2-.7-.5-.4-1.4-2.7-4.4-1.1-2.6 1-4.8.1-3 1.8-2.6 2.4 1.7 1.9-.2 3.1 2.5-.9 2.4.4 4.9 1.5 4.7-.4 2 1.7 3.1 2.3 3.4 2.7.5.3 4.4 2.4 3.1 2.5 1.5-1.8 4 .7 1.5 4.1 2.6 1.9 4 4.5 4.9 3.8 6.4 1.3 3.2v2.5l1.4 2.9-.3 2.2-1.6 1.6.3 1.8-1.9.7.8 3.1 2.2 4 5.3 3.6 1.9 2.9 5.4 2 3 .4 1.2 1.7 4.2 3 5.9 3 4 .9 4.8 2.9 4 1.2 3.7 1.7 2.9-.7 4.8-2.4 3.1-.4 4.4 1.6 2.6 2.1 5.5 6.9.4-1.9.8-1.5-.7-1.2 3.3-5.2h7.1l.4-2.1-.8-.4-.5-1.4-1.9-1.5-1.8-2.1h2.6l.4-3.6h5.2l5.1.1.1-1 .7-.3.9.8 2.5-3.9h1l1.2-.1 1.2 1.6 2-5 1.2-2.7-.9-1.1 1.8-3.9 3.5-3.8.6-3.1-1.2-1.3-3.4.5-4.8-.2-6 1.5-4 1.7-1.2 1.8-1.2 5.4-1.8 3.7-3.9 2.6-3.6 1.1-4.3 1.1-4.3.6-5.1 1.8-1.9-2.6-5.6-1.7-1.8-3.2-.7-3.6-3-4.7-.4-5-1.2-3.1-.5-3.4 1.1-3.1 1.8-8.6 1.8-4.5 3.1-5.6-2.1.2z"/>
+<path class="map-country" id="MY" data-name="Malaysia" d="M1543.6 532.7l-4.7-2.8-.9 1.1 1.4 2.7-.4 4.7 2.1 3.4 1 5.3 3.4 4.3.8 3.2 6.7 5 5.4 4.8 4-.5.1-2.1-2.3-5.6-2.1-1.8-.5-3.8-.6-2.1.5-2.9-.5-4.3-2.6-4.3-3.5-3.8-1.3-.6-1.7 2.6-3.7.8-.6-3.3zm99 11l-1.2-3.1 3.8-.4.3-2.4-4.8-2-3.8-1.7-.4-2.8-3.1-3.2h-2.3l-2.5 5-4.1 4.4-.1 3.1-.1 4.1-2.7-.2-1.1 2.2-2.7-3.3-2.6 4-3.8 5-6.7 1.4-2.4 1.2-.9 5.4-4.4 1.2-4.1-2.2 1 4.3 3.9 3.5 3.6-1.2 3.6.4 3.2-3.2 2.7-.6 5.4 1.8 4.5-1.3 2.7-8.9 2-2.2 1.7-7.2h6.4l5 1 4-2.1z"/>
+<path class="map-country" id="MZ" data-name="Mozambique" d="M1203 640.7l-.8-2.9-4.6 3.7-6.2 2.5-3.3-.1-2.1 1.9-3.9.1-1.4.8-6.7-1.8-2.1.3-1.6 6 .7 7.3h.3l1.9 2 2.2 4.6.1 8.2-2.5 1.3-1.9 4.5-3.4-4-.2-4.5 1.3-2.9-.3-2.6-2.1-1.6-1.6.6-3-3-17.1 5.2.3 4.5.3 2.4 4.6-.1 2.6 1.3 1.1 1.6 2.6.5 2.8 2-.3 8.1-1.3 4.4-.5 4.7.8 1.9-.8 3.7-.9.6-1.6 4.6-6.2 7.2 2.2 9 1.1 4.5-1.4 7.1.4 2.3.6 2.9.3 2.8h4.1l.7-3.3-1.4-.5-.3-2.6 2.6-2.4 6.8-3.4 4.6-2.2 2.5-2.3.9-2.6-1.2-1.1 1.1-3 .5-6.2-1 .3v-1.9l-.8-3.7-2.4-4.8.7-4.6 2.3-1.4 4.1-4.6 2.2-1.1 6.7-6.8 6.4-3.1 5.2-2.5 3.7-3.9 2.4-4.4 1.9-4.6-.9-3.1.2-9.9-.4-5.6.4-6.3z"/>
+<path class="map-country" id="NA" data-name="Namibia" d="M1105.4 683.7l-10.3 2.5-13.4-.9-3.7-3-22.5.3-.9.4-3.2-2.9-3.6-.1-3.3 1-2.7 1.2.2 4.9 4.4 6.2 1.1 4 2.8 7.7 2.7 5.2 2.1 2.6.6 3.5v7.6l1.6 9.8 1.2 4.6 1 6.2 1.9 4.7 3.9 4.8 2.7-3.2 2.1 1.8.8 2.7 2.4.5 3.3 1.2 2.9-.5 5-3.2 1.1-23.6.6-18.5 5.4-.2.9-22.7 4.1-.2 8.6-2.2 2 2.6 3.7-2.5h1.6l3.2-1.5v-.5l-2.1-1.4-3.6-.4-4.6 1.5z"/>
+<path class="map-country" id="NC" data-name="New Caledonia" d="M1897.3 716.1v-.3l-.4-.2-.2.5v.1l.2.1h.2l.2-.2zm4.6-7.6l-.1-.1v-.3l.1-.2-.4.2-.6.2.1.8-.1.4.3.1.1.3h.2l.7-.2.3-1.1h-.4l-.2-.1zm-3-1.7l.3-.5.1-.2-.2-.7-.3-.3.3-1-.1-.2-.4-.2-.9.3-.1.2.5.1.2.2-.5.7-.5.1.1.5.2.4.7.2.3.4h.3zm-3.9-2.9l.3-.3.3-.4-.1-.1v-.3l.2-.4.3-.1-.2-.2-.2-.1v.3l-.3.7-.1.3-.5.6h.3zm-12.3-2.9l-.6-.7-.1.2-.1.4v.3l.3.2.1.2-.1.5v.4l.6.9.1.7.3.6.5.5.4.5.8 1.4.2.5.4.3 1 1.2.4.4.4.2.9.7.6.3.3.5.6.3.8.4.1.2v.3l.1.3.5.4.6.3.1.2.1.2.3-.1.3.1.9.7.4-.1h.3l.5-.2.3-.4-.1-1.1-.5-.5-.7-.4-.4-.5-.4-.5-.8-1-1.1-1-.5-.2-.3-.4-.3-.1-.2-.3-.5-.3-.3-.6-.6-.6-.1-.3.1-.3-.1-.3-.4-.3-.2-.5-.2-.3-.4-.2-.7-.4-1.6-1.9-.7-.6-.7.2-.6-.4zm-22-6l.2-.4.1-.8-.2.4-.2 1 .1-.2z"/>
+<path class="map-country" id="NE" data-name="Niger" d="M1051.3 425.6l-8.8-2.8-18.6 12.2-15.8 12.5-7.8 2.8.1 14.6-3 4.3-.5 3.9-4.9 1-7.6.6-2 2.2-3.6.3-.5 3.1.8 2.9 3.1 4.1.2 3.1 6.4 1.4-.1 4.4 1.9-1.9h2l4.3 3.7.3-5.7 1.6-2.6.8-3.6 1.4-1.4 6-.8 5.6 2.4 2.1 2.4 2.9.1 2.6-1.5 6.8 3.3 2.8-.2 3.3-2.7 3.3.2 1.6-.9 3 .4 4.3 1.8 4.3-3.5 1.3.2 3.9 7 1-.2.2-2 1.6-.4.5-2.9-3.6-.2v-4.1l-2.4-2.3 2.3-8.4 6.9-6 .2-8.3 1.8-12.9 1.1-2.7-2.3-2.2-.2-2.1-2-1.6-1.6-9.9-3.9 2.4-3.1-3.5z"/>
+<path class="map-country" id="NG" data-name="Nigeria" d="M1055.8 492.7l-1 .2-3.9-7-1.3-.2-4.3 3.5-4.3-1.8-3-.4-1.6.9-3.3-.2-3.3 2.7-2.8.2-6.8-3.3-2.6 1.5-2.9-.1-2.1-2.4-5.6-2.4-6 .8-1.4 1.4-.8 3.6-1.6 2.6-.3 5.7-.2 2.1 1.2 3.8-1.1 2.5.6 1.7-2.7 4-1.7 1.9-1 4 .1 4.1-.3 10.2h9.2l3.9 4.2 1.9 4.6 3 3.9 4.5.2 2.2-1.4 2.1.3 5.8-2.3 1.4-4.5 2.7-6.1 1.6-.1 3.3-3.7 2.1-.1 3.2 2.6 3.9-2.2.5-2.6 1.2-2.6.8-3.2 3-2.6 1.1-4.5 1.2-1.4.7-3.3 1.5-4 4.6-5 .3-2.1.6-1.1-2.3-2.6z"/>
+<path class="map-country" id="NI" data-name="Nicaragua" d="M514.1 476.8l-1.9-.2-.9.9-2 .8h-1.4l-1.3.8-1.1-.3-.9-.9-.6.2-.8 1.5-.5-.1-.3 1.3-2.1 1.8-1.1.7-.6.8-1.5-1.3-1.4 1.7h-1.2l-1.3.2-.2 3.1h-.8l-.8 1.5-1.8.3-.4.4-.9-1-.7 1 2.6 2.9 2.2 2 1 2.1 2.5 2.6 1.8 2 .9-.8 3.5 1.7 1.4-.8 1.7.5.8 1.3 1.7.4 1.4-1.3-.8-1.1-.1-1.7 1.2-1.6-.2-1.7.7-2.7.9-.7.1-2.8-.2-1.7.4-2.8.9-2.5 1.4-2.2-.3-2.3.4-1.4.6-.6z"/>
+<path class="map-country" id="NL" data-name="Netherlands" d="M1005.5 243.9h2.9l1.1-2.3 1-5.6-1-2-3.9-.2-6.5 2.6-3.9 8.9-2.5 1.7 3.6.5 4.4-1.3 3.1 2.7 2.8 1.4-1.1-6.4z"/>
+<path class="map-country" id="NO" data-name="Norway" d="M1088.8 133.1l-6.9 1.1-7.3-.3-5.1 4.4-6.7-.3-8.5 2.3-10.1 6.8-6.4 4-8.8 10.7-7.1 7.8-8.1 5.8-11.2 4.8-3.9 3.6 1.9 13.4 1.9 6.3 6.4 3 6-1.4 8.5-6.8 3.3 3.6 1.7-3.3 3.4-4 .9-6.9-3.1-2.9-1-7.6 2.3-5.3 4.3.1 1.3-2.2-1.8-1.9 5.7-7.9 3.4-6.1 2.2-3.9 4 .1.6-3.1 7.9.9v-3.5l2.5-.3 2.1-1.4 5.1 2.9 5.3-.3 4.7 1.3 3.4-2.4 1.1-3.9 5.8-1.8 5.7 2.1-.8 3.8 3.2-.5 6.4-2.2-5.4-3.3 4.8-1.4-13.6-3.9zm-22.6-33.3l-5.6-1-1.9-1.7-7.2.9 2.6 1.5-2.2 1.2 6.7 1.1 7.6-2zm-25.4-8.3l-4.8-1.6-5.1.2-1 1.5h-5l-2.2-1.5-9.3 1.6 3.2 3.5 7.6 3.8 5.7 1.4-3 1.7 8.4 2.9 4.4-.2.9-3.9 3-.9 1.2-3.4 8.5-1.8-12.5-3.3zm24.2-3.1l-9.1-1-3.2 1.2-5.3-1-10.4 1.2 4.3 2h5.1l.9 1.3 10.6.7 10.1-.5 4.3-2.4-7.3-1.5z"/>
+<path class="map-country" id="NP" data-name="Nepal" d="M1455.2 394.8l-6.5-.6-6.4-1.5-5-2.8-4.5-1.2-2.5-3.1-3.2-.9-6.4-4.1-4.7-2-1.9 1.5-2.8 2.9-.9 5.9 5.7 2.5 5.8 3.1 7.7 3.5 7.6.9 3.8 3.2 4.3.6 6.8 1.5 4.6-.1.1-2.5-1.5-4.1-.1-2.7z"/>
+<path class="map-country" id="NR" data-name="Nauru" d="M1915 575.5v-.2h-.2l-.1.2.1.1.1.1.1-.2z"/>
+<path class="map-country" id="NZ" data-name="New Zealand" d="M1868.6 832.8l.9-2.6-5.8 2.9-3.4 3.4-3.2 1.6-5.9 4.6-5.6 3.2-7 3.2-5.5 2.4-4.3 1.1-11.3 6.1-6.4 4.6-1.1 2.3 5.1.4 1.5 2.1 4.5.1 4-1.8 6.3-2.8 8.1-6.2 4.7-4.1 6.2-2.3 4-.1.6-2.9 4.6-2.5 7-4.5 4.2-2.9 2.1-2.6.5-2.6-5.6 2.5.8-2.6zm28.8-30.5l1.9-5.7-3.1-1.7-.8-3.6-2.3.5-.4 4.6.8 5.7.9 2.7-.9 1.1-.6 4.4-2.4 4.1-4.2 5-5.3 2.2-1.7 2.4 3.7 2.5-.8 3.5-6.9 5.1 1.4.9-.4 1.6 5.9-2.5 5.9-4.2 4.5-3.4 1.6-1.2 1.5-2.7 2.8-2 3.8.2 4.2-3.8 5.1-5.7-2.1-.8-4.6 2.5-3.2-.5-2.9-2.1 2.3-4.9-1.2-1.8-2.9 4.4.4-6.8z"/>
+<path class="map-country" id="OM" data-name="Oman" d="M1301 437.8l2.1-2 .8-1.8 1.6-3.8-.1-1.4-2.1-.8-1.6-2.1-2.9-3.7-3.3-1.1-4.1-.9-3.3-2.3-2.9-4.3h-2.8l-.1 4.2 1.1.8-2.4 1.3.3 2.6-1.4 2.6.1 2.6 2.9 4.5-2.6 12.7-16.1 6.4 5.2 10.5 2.1 4.4 2.5-.3 3.6-2.2 3.1.6 2.5-1.8-.2-2.5 2.1-1.6h3.4l1.2-1.3.2-3.1 3.3-2.4h2.6l.4-.8-1-4.2.6-3.2 1-1.5 2.5.3 1.7-4.4zm-16.6-30.4l.2-2.6-.7-.6-1.3 2.2 1.3 2.2.5-1.2z"/>
+<path class="map-country" id="PA" data-name="Panama" d="M543.5 517l-2-1.8-1.7-1.9-2.5-1.1-3.1-.2.3-.6-3.1-.4-2 1.9-3.5 1.3-2.5 1.6-2.7.5-1.5-1.6-.5.5-2.3-.3.2-1.3-1.9-2.3-2.2.6-.1 2.5 1.1 1-.8.7.1 1.2-.5 1.3-.4 1.2.6 1 .3-1.4h2.4l1.4.7 2.3.5 1 2.5 1.8.4.8-1.1.8 3.8 2.6-.3.9-.9 1.5-.9-2.5-3.4.6-1.3 1.3-.3 2.3-1.6 1.2-2.2 2.5-.4 2.7 1.8 1 2.1 1.4.4-1.5 1.7 1 3.5 1.8 1.8.9-3.1 1.8.5 1.1-1.9-1.1-3.8.7-.9z"/>
+<path class="map-country" id="PE" data-name="Peru" d="M584.3 599.5l-2.9-3.4-1.7-.1 3.5-6.5-4.4-3-3.3.6-2.1-1.1-3 1.7-4.2-.8-3.4-6.7-2.7-1.7-1.8-3-3.7-3-1.5.6.8 4.9-1.7 4.1-6 6.7-6.7 2.5-3.3 5.5-.9 4.3-3.1 2.6-2.5-3.2-2.3-.7-2.3.5-.2-2.3 1.5-1.5-.7-2.7-4.4 4-1.6 4.5 3 6.1-1.7 2.8 4.1 2.6 4.5 4.1 2 4.7 2.4 2.9 6 12.7 6.2 11.7 5.4 8.4-.8 1.8 2.8 5.3 4.6 3.9 10.7 6.9 11.6 6.4.7 2.6 5.9 3.7 2.7-1.6 1.2-3.3 2.8-6.9-2.8-5.3 1.1-2.1-1.2-2.4 1.9-3.2-.3-5.4-.1-4.5 1.1-2.1-5.5-10.3-3 1.1-2.6-.7-.2-9.7-4.4 3.8-4.9-.2-2.3-3.4-3.7-.3 1-2.8-3.3-3.8-2.6-5.8 1.5-1.1-.1-2.7 3.3-1.9-.7-3.4 1.3-2.2.4-3 6.2-4.3 4.6-1.2.7-1 5.1.3z"/>
+<path class="map-country" id="PF" data-name="French Polynesia" d="M213.2 704.9l-.1-.3-.2-.3-.1.1.1.1.2.3v.2l.1-.1zm9.3-14.7l-.2-.2-.4-.2-.2-.1-.2-.1-.1.1.1.1h.1l.3.2.3.1.2.1v.1l.1-.1zm-24.5-1.1l-.6-.3.1.2.4.2.2.1-.1-.2zm20.5-.2l-.4-.5h-.3l.7.6v-.1zm-21.6-1l-.4-.4-.2-.3-.3-.1.1.1.4.4.3.4.2.1-.1-.2zm-.3-2.1l-.1-.1v-.3l.2-.3.6-.4v-.1l-.2.1-.4.2-.2.2-.1.2-.1.3.1.2.1.1h.2l-.1-.1zm-47.4-1.1l-.2-.6-.3-.5-.8-.1-.5.2-.1.2.1.4.5.7.5.1.8-.1.4.6.2.1.4.1.1-.3-.2-.5-.9-.3zm-2.9-.9l.1-.4-.2-.1h-.5v.2l.1.2.1.1.3.2.1-.2zm-9.7-4.3h.2l-.4-.6-.3-.2V679.5l.3.1.2-.1zm43.9-1.6h-.6l.5.1.4.2-.3-.3zm-.7.1l-.3-.1-.3-.2h-.3l.7.3h.2zm-43.8.1l.1-.2-.1-.1-.4-.2.1.3v.2l.2.1.1-.1zm32.8-2l-.3-.4-.2-.3-.2-.4-.4-.5.1.3.1.2.2.2.2.4.1.2.3.4h.1v-.1zm16.2-1.5l.1-.5h-.2v.5h.1zm-14.4-1.6l-.6-.6h-.1l.1.2.5.5.1.2v-.3zm30.8-33.9l.1-.2v-.2l-.1-.1-.3-.1.1.7.2-.1zm-2.7-3.7l-.1-.2h-.2l-.1.1v.5l.4-.4zm.1-1.6l-.8.5.2.4.4.1.2-.2.8-.1.3-.4-.3.1-.8-.4zm-6.1-1.7l.2-.5-.2-.1-.4.2v.2l.3.4.1-.2zm2.6-3.1l.3-.1v-.1l-.2-.2-.3-.1-.1.1-.1.2.1.3.3-.1zm-2.9-.1l.1-.3v-.2l-.1-.2-.9-.2-.1.1v.4l.2.5h.3l.5-.1z"/>
+<path class="map-country" id="PG" data-name="Papua New Guinea" d="M1850.7 615.6l.9-1.8-2.4-2.2-2.5-4-1.6-1.5-.5-1.9-.8.7.9 4.8 2.2 4 2.2 2.5 1.6-.6zm-21.2-8.6l2.1-3.9.4-3.5-1.1-1-3.4.1.4 3.7-3.3 2.3-1.7 2.2-3.2.5-.4-3.4-.8.1-1 3.1-3.1.5-5-.9-.6 1.9 3.1 1.8 4.5 1.9h2.9l3-1.5 3.2-1.6 1-1.8 3-.5zm-27.8 12.2l-.9-4.3 5.2-.7-1.1-3.3-9.1-4-.6-3.7-2.9-3.2-3.7-3.3-10.2-3.6-9.6-4.4-1 20.7-1.5 20.8 5.7.2 3.1 1.1 4.6-2.2-.3-4.7 3.6-2.1 4.9-1.8 7 2.8 2.4 5.6 2.9 3.5 3.9 4 5.5 1 4.8.7 1.1 1.6 3.8-.4.8-1.8-5.6-2.7 1.8-1.2-4.2-1.1.5-2.8-3.2.2-3-6.8-4.7-4.1zm34.7-18.4l-.5-3.3-2-2.1-2.1-2.6-2.3-1.5-1.9-1.4-2.9-1.8-1.6 1.5 3.9 1.9 3.1 2.7 2.4 2.1 1.2 2.4.8 3.8 1.9-1.7z"/>
+<path class="map-country" id="PH" data-name="Philippines" d="M1684.6 518.6l-.6-2.3-.8-3.2-4.8-3 .8 4.9-3.9.2-.7 2.8-4.2 1.7-2.2-2.8-2.8 2.4-3.4 1.7-1.9 5.4 1.1 1.9 3.9-3.6 2.7.3 1.5-2.7 3.8 3-1.5 3.1 1.9 4.6 6.8 3.7 1.4-3-2.1-4.7 2.4-3.2 2.5 6.4 1.5-5.8-.6-3.5-.8-4.3zm-14.5-11.8v-6.1l-3.6 6.1.5-4.2-3 .3-.3 4-1.2 1.8-1 1.7 3.8 4.4 1.6-1.9 1.4-4 1.8-2.1zm-30.1 6.1l2.6-4.4 3.4-3.5-1.5-5.2-2.4 6.3-2.9 4.4-3.8 4-2.4 4.4 7-6zm17.4-16.4l1.2 3-.1 3.3.5 2.9 3.3-1.9 2.4-2.7-.2-2.6h-3.6l-3.5-2zm20-1.7l-1.8-2.4-5.4-.1 4 4.8.3 2.4-3.3-.5 1.2 3.9 1.7.3.7 4.5 2.5-1.4-1.7-4-.4-2.1 4.5 1.7-2.3-7.1zm-22.9-5.8l-2.2-2.3-4.8-.2 3.4 4.8 2.8 3.2.8-5.5zm-6.4-34.6h-3.3l-.9 5.8 1.1 9.9-2.6-2 1.2 6 1.2 2.8 3.3 3.7.4-2.3 1.8 1.4-1.5 1.7.1 2.6 2.9 1.4 5-.9 4 3.8 1.1-2.4 2.5 3.4 4.8 3.1.2-2.9-2-1.6.1-3.4-7.5-3.6-2.3.8-3.1-.7-2-5.1.1-5.1 3-2.1.6-5.3-2.7-4.6.4-2.6-.7-1.6-1.5 1.6-3.7-1.8z"/>
+<path class="map-country" id="PK" data-name="Pakistan" d="M1388.3 346.3l-9.4-2.6-2.9-5-4.7-3-2.8.7-2.4 1.2-5.8.8-5.3 1.3-2.4 2.8 1.9 2.8 1.4 3.2-2 2.7.8 2.5-.9 2.3-5.1-.2 3 4.2-3 1.6-1.5 3.8 1.1 3.8-1.7 1.8-2.1-.6-4 .9-.2 1.7h-4l-2.3 3.6.8 5.4-6.6 2.6-3.8-.5-.9 1.4-3.3-.8-5.3.9-9.6-3.2 3.2 3.3 2.8 3.9 5.6 2.7 1 5.7 2.7 1 .9 2.9-7.4 3.3-1.2 7.4 7.6-.9 8.9-.1 9.9-1.2 4.9 4.8 2.1 4.6 4.2 1.6 3.2-4.2h12l-1.8-5.5-3.5-3.2-1.3-4.9-4-2.9 4.9-6.6 6.4.5 4.5-6.7 2.1-6.5 3.9-6.3-1-4.5 3.7-3.7-5-3.1-2.9-4.3-3.2-5.6 1.9-2.8 8.5 1.6 5.7-1 3.7-5.4z"/>
+<path class="map-country" id="PL" data-name="Poland" d="M1069.4 228.3l-4.6-.1-.5-1.4-4.8-1.1-5.7 2.1-7.1 2.8-3.1 1.7 1.4 3.1-1.2 1.6 2 2.2 1.4 3.3-.1 2.1 2.3 3.9 2.4 1.9 3.7.6-.1 1.7 2.7 1.2.6-1.5 3.4.6.7 2 3.6.3 2.6 3.1.3.4 1.9-.9 2.7 2.2 2.8-1.3 2.4.6 3.4-.8 4.9 2.3 1.1.4-1.6-2.8 3.8-5.1 2.3-.7.3-1.8-3.1-5.3-.5-2.7-1.9-2.9 2.7-1.2-.3-2.4-1.7-2.3-.6-2.7-1.4-1.9-2.5-.6-8.7.1-5.9-.7z"/>
+<path class="map-country" id="PN" data-name="Pitcairn Islands" d="M274.2 727.4v-.2l-.1-.2-.2-.1-.1.1.1.2.2.2.1.1v-.1z"/>
+<path class="map-country" id="PR" data-name="Puerto Rico" d="M600.8 457.3v-.1h.1v-.1l.1-.1v-.1h-.5v.2l.2.1v.1h.1zm13.6-.3l.7-.2v-.1l-.4-.1h-.6l-.5.2.1.2h.7zm-3.7-2.2l-.1-.2h-.2l-3.5-.1-1.3-.2-.3.1-.3.1-.1.4-.2.2-.3.2.1.3.1.2.2.4-.1.5-.2 1 .3.2.7-.1.3.1.3.1.4-.1.4-.2.9.1.5-.1.6.3.4-.1.2.1H610.4l.9-.2.8-.5.3-.5.4-.3.6-.4v-.9l-.7-.1-.6-.3-1.1-.1h-.1l.1.2h-.1l-.2-.1z"/>
+<path class="map-country" id="PS" data-name="Palestinian Territories" d="M1166.9 366.1l-2-.9-.7 4.3 1.4.7-1.2.8-.1 1.7 2.4-.8.6-1.9-.4-3.9z"/>
+<path class="map-country" id="PT" data-name="Portugal" d="M937.6 335.9l-.4-2.1 2-2.5.8-1.7-1.8-1.9 1.6-4.3-2-3.8 2.2-.5.3-3 .9-.9.2-4.9 2.4-1.7-1.3-3.1-3-.2-.9.8h-3l-1.2-3.1-2.1.9-1.9 1.6.1 2.1.9 2.2.1 2.7-1.3 3.8-.4 2.5-2.2 2.3-.6 4.2 1.2 2.4 2.3.6.4 4-1 5.1 2.8-.7 2.7.9 2.2-1.7z"/>
+<path class="map-country" id="PY" data-name="Paraguay" d="M655.7 700.5l-.3-1.9-5.4-3.3-5.1-.1-9.5 1.9-2.1 5.6.2 3.4-1.5 7.6 11.2 10.4 4.6 1 7.2 4.7 5.9 2.5 1.1 2.8-4.2 9.6 5.7 1.8 6.2 1 4.2-1.1 4.3-4.8.3-5.7.7-3.6.3-3.8-.3-3.5-2.1-1.2-2 1.1-2-.3-.9-2.5-1-5.8-1.2-1.9-3.9-1.7-2.1 1.2-6-1.2-.4-8.6-1.9-3.6z"/>
+<path class="map-country" id="QA" data-name="Qatar" d="M1258 415.5l.8-3.8-.5-3.7-1.9-2-1.4.7-1.1 3.3.8 4.7 1.8 1.2 1.5-.4z"/>
+<path class="map-country" id="RE" data-name="RÃƒÂ©union" d="M1284 707.9l.2-.4.1-.8-.4-.8-.4-.7-.4-.2-.8-.1-.7.3-.4.6-.2.3.4 1.1.2.3 1.1.6h.5l.8-.2z"/>
+<path class="map-country" id="RO" data-name="Romania" d="M1108.1 266.3h-2.1l-1 1.5-3.6.6-1.6.9-2.4-1.5h-3.2l-3.2-.7-1.9 1.3-2.9 1.3-1.9 4.2-2.6 4.3-3.8 1.1 2.9 2.5.8 1.9 3.2 1.5.7 2.5 3.1 1.8 1.4-1.3 1.4.7-1.1 1.1 1 1 1.8 2.6 1.9-.5 4 1 7.5.3 2.3-1.6 5.8-1.4 4 2.2 3 .7.4-7.4 1.6.5 2.3-1.3-.4-1.6-2.4-1.1-2.2 1-2.4-1.1-1.3-2.8.2-2.7-.6-2.7-3.4-3.7-1.9-2.6-1.8-1.9-1.6-.6z"/>
+<path class="map-country" id="RS" data-name="Serbia" d="M1084.8 285.2l-3.2-1.5-.8-1.9-2.9-2.5-3.2-.2-3.7 1.6 1.5 2.4 1.7 1.8-1.7 2.3h1.8l-1 2.7 2.7 2.3-.5 2.9-1.2.3 1.5 1.1.8.8 1.8.7 2 1.2-.4.6 1.2-.5.5-2 .9-.4.8.9 1 .4.8 1 .8.3 1.1 1.1h.8l-.5 1.5-.5.7.2.5 1.7-.4 2.4-.1.7-.9-.6-.7.7-2 1.7-1.9-2.8-2.6-.7-2.3 1.1-1.4-1-1 1.1-1.1-1.4-.7-1.4 1.3-3.1-1.8-.7-2.5z"/>
+<path class="map-country" id="RU" data-name="Russia" d="M1332.3 95.1l-4.5-4-13.6-4.1-9.4-2.1-6.2.9-5.3 2.9 5.8.8 6.6 3.2 8 1.7 11.5 1.3 7.1-.6zm-178.7-7.3l.9-.6-5.7-.9-2.8.7-1.3 1-1.5-1.2-5.2.1-6.2.8 7.7.1-1.1 1.3 4.4 1 3.6-.7.1-.7 2.9-.3 4.2-.6zm200.5 9.9l-1.5-1.8-12.5-2.6-3-.3-2.2.5 1.2 6 18-1.8zm15.2 6.3l-9.2-.7 3.4-1.2-8.2-1.5-6.1 1.9-1 2 1.5 2.1-6.9-.1-5.3 2.6-4.3-1.1-9.3.5.3 1.3-9.2.7-4.9 2.4-4.2.2-1.2 3.3 5.5 2.6-7.7.7-9.5-.3-5.8 1.1 4.8 5.4 6.9 4.3-9.6-3-7.9.3-5.1 2 4.5 3.8-4.9-1-2.1-5-4.2-2.8-1.8.1 3.6 3.7-4.6 3.5 8.1 4.2.4 5.4 2.9 2.9 4.7.5.4 3.5 4.4 3.1-1.9 2.6.5 2.7-3.7 1.4-.5 2-5.3-.8 3.5-7.8-.5-3.6-6.7-3.3-3.8-7.3-3.7-3.7-3.6-1.6.8-4.2-2.9-2.9-11.3-1.4-2.1 1 .5 4.7-4.3 4.7 1.2 1.7 4.7 4.1.1 2.6 5.3.5.8 1.1 5.8 2.9-1 2.8-18.5-6.1-6.6-1.7-12.8-1.6-1.2 1.7 5.9 3.1-2.7 3.6-6.4-3.2-5 2.2-7.6.1-2.1 1.9-5.3-.6 2.5-3.3-3.2-.2-12.3 4.6-7.6 2.6.4 3.5-6 1.2-4-1.9-1.2-3 5-.7-3.6-3-12.2-1.8 4.3 3.4-.8 3.2 4.7 3.3-1.1 3.8-4.6-1.9-4-.3-8 5.4 4.2 4.1-3.2 1.4-11.4-3.5-2.1 2.1 3.3 2.4.2 2.7-3.8-1.4-6-1.7-1.9-5.8-1-2.6-8-4 2.9-.7 20.1 4.2 6.4-1.5 3.7-2.9-1.6-3.6-4-2.6-17.6-6.1-11.6-1.3-7.6-3.2-3.6 1.8-6.4 2.2-3.2.5.4 3.7 7.2 3.7-2.8 4.1 6.4 6.3-1.7 4.8 4.9 4.1-.9 3.7 7.3 3.9-.9 2.9-3.3 3.3-7.9 7.4 5.3 2.8-4.5 3.2.9 1-2.6 3.4 2.5 5.5-1.6 1.9 2.4 1.4 1 2.8 2.1 3.6 5.2 1.5 1 1.4 2.3-.7 4.8 1.4 1 2.9-.6 1.6 3.7 3.9 2.2 1.1-.1 1.1 3.4 1.1 1.7 1.6-1.6 1.3-3.9-.2-.8.6 1.5 2 2 3.9 1.8.2 1-1.4 1.5.3 4.8-.5 3.8 3.4-.9 1.3.7 1.9 4 .2 2.2 2.7.2 1.2 6.6 2.2 3.5-1 3.6 2.9 2.9-.1 7.6 2 .4 1.9-1.3 3.2 1.8 3.4-.3 2.1-4.7.5-2.2 1.7.4 2.8 4.2-1 .4 1.3-6.8 2.6 3.2 2.4-3.2 5.2-3.4 1 5 3.6 6.2 2.4 7.4 5.1.5-.7 4.5 1.1 7.7 1 7.5 2.9 1.1 1.2 2.9-1 5.1 1.3 2.1 2.5 3.5 1.4 1.5.2 4.3 3.8 2.4.4.5-1.5 2.6-2.5-7.3-7.3-.4-4.1-5.9-5.9 3.5-6.3 4.6-1.1 1.4-3.7-2.8-1-.2-3.2-4.2-4.1-3.6.2-5.3-4.3 1.7-4.7-1.7-1.2 2.1-6.8 6 3.6-.7-4.6 8.1-6.6 7.5-.2 11.9 4.3 6.6 2.4 4.3-2.5 7.6-.2 7.3 3.2.8-1.8 6.9.3.2-3-9.4-4.2 3.6-2.9-1.5-1.7 3.9-1.6-5-4.1 1.4-2.1 16.8-2.1 1.7-1.5 10.8-2.2 3.1-2.5 9 1.3 4.3 6.3 4.3-1.5 7 2.1 1.2 3.3 4.4-.4 9.1-5.7-.8 1.9 8.3 4.7 18.1 15.5 1.1-3.3 8.3 3.6 6.2-1.6 3.2 1.1 4.1 3.6 3.9 1.2 3.3 2.6 6-.9 4.3 3.8 1.7-.5 4.7-1 6.6-5.4 5.9-2.9 5.3 1.9 5.1.1 4.7 2.9 5 .2 7.9 1.6 2.4-4.3-4-3.6 1.3-6.4 6.9 2.5 4.8.8 6.6 1.5 3.7 4.6 8.4 2.6 3.9-1.1 5.7-.8 5.4.8 6.5 3 4.9 3.1h4.5l6.7 1 3.6-1.6 5.8-1 4.5-4.4 3.3.7 3.9 2.1 5.5-.5 7.3 2.3 4.4-3.9-1.9-2.7-.1-6.5 1.2-2-2.5-3.3-3.7-1.5 1.7-3 5.1-1.1 6.2-.2 8.5 1.8 5.9 2.3 7.7 6.1 3.8 2.7 4.4 3.7 6.1 6.1 9.9 1.9 8.9 4.5 6 5.8h7.5l2.6-2.5 6.9-1.8 1.3 5.6-.4 2.3 2.8 6.8.6 6-6.8-1.1-2.9 2.2 4.7 5.3 3.8 7.3-2.5.1 1.9 3.1 1.4 1.1-.4-2 4-4.5 5.1 3 3.2-.1 4.4-3.6 1-3.7 2.1-7.1 1.9-7.2-1.3-4.3 1-9-5.2-9.9-5.5-7.3-1.3-6.2-4.7-5.1-12.7-6.7-5.6-.4-.3 3-5.8-1.3-5.7-3.8-8-.7 4.9-14.1 3.5-11.5 13.1-1.8 14.9 1 2.5-2.8 7.9.8 4.3 4.3 6.4-.6 8.4-1.6-7.7-3.5v-9.8l9.1-1.9 12.1 7.1 3.6-6.4-3.2-4.7 4.7-.5 6.5 8.1-2.4 4.6-.8 6 .3 7.5-5.7 1.3 2.8 2.7-.1 3.6 6.4 8.3 16 13.4 10.5 8.8 5.7 4.3 1.6-5.7-4.5-6.2 5.7-1.5-5.4-6.9 5-3.1-4.7-2.6-3.4-5 4.1-.2-9-8.6-6.7-1.4-2.9-2.4-1.1-5.6-3.1-3.9 7 .8 1.3-2.5 4.7 2.2 6.1-4.6 11.4 4-1.7-2.6 2-3.6 1.5-4 3.1-.7 6.5-4.3 9.8 1.2-.9-1.5-3.8-2.3-4.1-1.6-9.1-4.6-8.1-3 6.1.4 2-2.5-32.9-21.9-9.4-2.3-15.7-2.6-7.9.3-15.2-1.4 1.8 2.3 8.5 3.4-2.5 1.8-14.2-4.8-6.8.6-9.2-1.1-7 .2-3.9 1.1-7.2-1.6-5.1-3.8-6.5-2.2-9.2-.9-14.7 1-16.1-4-7.8-3-40.1-3.4-2.1 2.2 9.3 4.8-7.5-.7-1 1.5-9.7-1.6-5 1.4-9.3-2.4 3 5.5-8.9-2.1-10-4.1-.4-2.2-6-3.3-9.8-2.6h-6.1l-9.3-.9 4.7 3.9-17.2-.8-3.9-2.3-13.3-.9-5.3.8-.1 1.3-5.8-3.2-2.3.9-7.2-1.2-5.6-.7 1.1-1.5 6.6-2.8 2.3-1.5-2.4-2.5-5.5-1.9-11.5-2.3-10.8-.1-1.9 1.2-4.1-2.4zm-162.2 31.6l-9.9-4.3-3.1-4.3 3.3-4.9 2.8-5 8.6-4.7 9.8-2.4 11.3-2.4 1.3-1.5-4.2-1.9-6.6.6-4.9 1.8-11.7.9-10.1 3.1-6.8 2.7 2.5 2.2-6.6 4.4 3.9.7-5.4 4.3 1.6 2.8-3.4 1.1 1.9 2.8 7.9 1.4 2.2 2.3 13.4.7 2.2-.4zm314-24.7l-17.9-2.6-10.2-.2-3.4.9 3.4 3.4 12.4 3.2 4.5-1.2 14.2.2-3-3.7zm25.2 2.3l-11.7-1.3-8.2-.7 1.7 1.6 10.3 2 6.8.4 1.1-2zm-12.5 9.5l-2.5-1.4-8.3-1.9-4.1.5-.8 2 1.1.2 8.8.6h5.8zm162.6 12.3l-6-3.6-1.4 2.2 3.5 1.6 3.9-.2zM1084 228.9l-.6-1.5.2-1.7-2.2-.9-5-1.1-6.3 2-.7 2.6 5.9.7 8.7-.1zm589.7 21.8l-7.2-6.2-5.1-6-6.8-5.8-4.9-4-1.3.8 4.4 2.8-1.9 2.8 6.8 8.3 7.8 6 6.4 8.3 2.4 4.6 5.5 6.8 3.8 6 4.6 5.2-.1-4.8 6.5 3.8-3-4.4-9.5-6.3-3.7-9 8.9 2-13.6-10.9z"/>
+<path class="map-country" id="RW" data-name="Rwanda" d="M1147.6 579.4l-3.3 1.9-1.4-.6-1.6 1.8-.2 3.8-.8.4-.6 3.5 3.5.5 1.7-3.6 3 .4 1.6-.8.4-3.7-2.3-3.6z"/>
+<path class="map-country" id="SA" data-name="Saudi Arabia" d="M1228.7 387l-10.2-.5-16.7-12.7-8.5-4.5-6.7-1.7-.9 1-10.4 3.1 6.1 6.4-1.7 1-.7 2.2-4 .8-1.1 2.3-2.1 2-6.1-1-.5 2.5v2.2l-.6 3.5h2.7l3.2 4.4 3.7 5.1 2.5 4.7 1.7 1.5 1.7 3.3-.2 1.4 2.1 3.7 3 1.3 2.8 2.5 3.6 7v3.8l.9 4.4 4 6.1 2.5 1 4.1 4.4 1.9 5.2 3.2 5.3 3 2.3.6 2.5 1.8 1.9.9 2.8 2.3-2.1-.7-2.7 1.2-3.1 2.4 1.7 1.5-.6 6.4-.2 1 .7 5.4.6 2.1-.3 1.6 2.1 2.5-1 3.5-6.7 5-2.9 15.7-2.4 16.1-6.4 2.6-12.7-2.9-4.5-1 1.3-16.8-3.2-2.6-6.4-.4-1.5-1.2-2.4-1.5.4-1.8-1.2-1-1.6-.9-2.1-1.7-1.8-1-2.1.4-2.1-.6-2.7-4-2.6-1.2-2.3-2.9-1.4-2.7-5.5-3.8.2-1.7-3.1-4.9-.6z"/>
+<path class="map-country" id="SB" data-name="Solomon Islands" d="M1909.1 646.4l-.2-.2-.1-.4h-.3l-.3.1.2.6h.2l.5-.1zm-35.6.8l-.1-.2-.5-.4-1.9-1.3-.4-.1-.1.1-.1.3.1.2.5.1v.1l.3.2.7.2.4.3.1.5.3.1.3.1.4-.2zm32-6.6v-.1l.2-.3-.2-.1-.5-.1-.7.1-.3.2-.2.3h-.2v.2l.1.4.2-.1.2.1.5-.5h.4l.5-.1zm-24.4-2.3l-.1-.2-.2-.1-.9-.7-.5-.2h-.5l-.1.5v.3h.6l.4.2v.6l.2.2v.5l1.2.9.7.4.7.1.4.2.5-.1.5.2.4-.1-.4-.3v-.4l-.5-1.3-.3-.3-.5.1-.5-.2h-.4l-.7-.3zm-.4-4.9l-.6-1.6-.2-.1.1.6.1.4-.1.5-.1.6.2.2.2-.2.4.5V633.4zm-9.8-2.2l-.3-.1-.4.3-.1.3-.1.7v.4l.3.7.3.5.3.3.2.2.9.1 1.7.1.9.4.9.2.4-.1.5-.2.1-.1-.1-.6-.2-.3-.4-.2-.2-.6-.5-.4-.9-.7h-1.6l-.6.1-1.1-1zm2.6-1.8l-.5.2v.3l.4.1.4.2.1.3.2-.1.4.2.2-.3-.4-.5-.4-.3h-.1l-.3-.1zm-5.6.8l.3-.2v-.4h-.3l-.1-.2h-.2l-.3.2-.2.3.1.2h.4l.2.1h.1zm-8.4-2.3l-.1-.2-.3-.2h-.2l-.5.1.1.1.6.3.3.1.1-.2zm3.1.4l.3-.2-.1-.2-.1-.5-.4.7.1.2h.2zm-.5-.9v-.4l-.2-.1.4-.3-.1-.1-.6-.2-.2.2-.2.1-.1.1-.1.1-.1.5.2.4.4.2.6-.5zm-4 .2l-.3-.4.1-.5.2-.1.2-.5-.1-.4-.2.1-.7.6-.1.3.6.8.3.2v-.1zm13-1.3l-.2-.4v-.2l-.3-.2-.2.1-.1.3.1.2.4.3.3-.1zm6-1.2h-.2l-.1.1h-.5l-.1.2.6 1.1-.3.5.4 2.2.4 1.2.8.8v.2l.8.5.6 1.3.2.1.1-.2v-.6l-.5-1.1.1-.8-.2-.3v-.3l-.2-.8-.6-.7-.3-.1-.2-.3.2-.6.2-.2.1-.3-1.3-1.9zm-16.6-.5l-.6-.2-.2-.3v-1l-.6-.3-.3.2-.6.7-.2.4-.5.3-.1.3v.4l.4.1.3-.4.9-.1.3.1v.4l.1.7.3.3.5.2.4.6.1-.3h.2l.2-.4-.3-1.2-.3-.5zm-6.5-.4l.1-.5-.1-.9-.2.1v.2l-.1.4.2.8.1-.1zm3.2-.4l.2-.2v-.9l-.2-.4-.2-.2-.5.1-.4.5v.5l.4.6h.7zm-2.6-1.2l.2-.3.5-.7.1-.3-.5-.2-.4-.5-.4-.2-.3.4v.4l.5.6-.1.4.2.1.1.4.1-.1zm17.5 3.9l-.1-.5-.3-.4.4-.5-2.2-1.9-.3-.2-.4-.1-.5-.4-.5-.1-.5-.4-.2-.3-.6-.4-.6-.8-1.5-.3.1.2.4.4.1.7.5.4.5.6.2.1.2.2.4.5.8.4.8.6.3.1.3.3 1.5.7.5.7.7.5v-.1zm-21.8-9.2l.2-.3-.7-.5-.2.3-.2.5.4.2.5-.2zm9.1 1.5l-.1-.1h-.3l-.4-.2-.7-.8-.2-.3-.2-1-.4-.4-1.4-.8-.8-.8-.7-.2-.2.2v.5l.2.3 1 .9 1.1 1.7 1 1 .8.1h.4v.1l.1.2.5.2.5-.4-.2-.2z"/>
+<path class="map-country" id="SC" data-name="Seychelles" d="M1288.5 602l-.5-.8-.4.3.2.3.3.2.1.4.3.2v-.6z"/>
+<path class="map-country" id="SD" data-name="Sudan" d="M1180.8 468.5l.4-4.2 1.6-2 4-1 2.6-3.6-3.1-2.4-2.2-1.6-2.5-7.6-1.1-6.5 1.1-1.2-2.1-6.2H1114.2l.5 12.7h-6.3v2.7l1.1 25.2-4.8-.4-2.4 4.7-1.4 3.9 1.2 1.5-1.8 1.9.7 2.7-1.4 2.6-.5 2.4 2-.4 1.2 2.5.1 3.7 2.1 1.8v1.6l.7 2.7 3.3 4v2.6l-.8 2.6.3 2 2 1.8.5.3 1.7-.7 1.9-1.2 1.3-5.7 1.5-2.9 4-.9 1 1.8 3 3.7 1.5.5 2-1.1 4.1.3.8 1.3h5.5l.2-1.3 2.9-1.2.5-1.9 2.1-1.3 4.8 3.7 2.8-.7 2.7-4.5 3-3.5-.6-3.9-1.4-1.8 3.4-.3.3-1.5 2.6.5-.5 4.7.8 4.6 2.9 2.5.7 2.2v3.1l.8.1v-.7l1.4-6.7 2.6-1.8.5-2.6 2.3-4.8 3.2-3.2 2.1-6.2.7-5.5-.7-2.5 1.9-9.4z"/>
+<path class="map-country" id="SE" data-name="Sweden" d="M1077.7 161.1l-1.9-2.2-1.7-8.4-7.2-3.7-5.9-2.7-2.5.3v3.5l-7.9-.9-.6 3.1-4-.1-2.2 3.9-3.4 6.1-5.7 7.9 1.8 1.9-1.3 2.2-4.3-.1-2.3 5.3 1 7.6 3.1 2.9-.9 6.9-3.4 4-1.7 3.3 4.2 8.4 4.4 6.7 2 5.7 5.3-.3 2.2-4.7 5.7.5 2-5.5.6-10 4.6-1.3 3.3-6.6-4.8-3.3-3.6-4 2.1-8.1 7.7-4.9 6.1-4.5-1.2-3.5 3.4-3.9 7-1.5z"/>
+<path class="map-country" id="SG" data-name="Singapore" d="M1561 563.7l.1-.2-.2-.2-.3-.1-.5-.2-.6.1-.3.6.9.4.9-.4z"/>
+<path class="map-country" id="SI" data-name="Slovenia" d="M1059.4 277l-1.2-2.1-.8-.1-.9 1.1-4.3.1-2.4 1.4-4.2-.4-.3 3 1.4 2.7-1.1.5 3.5.2.8-1 1.8 1 2 .1-.2-1.7 1.7-.6.3-2.5 3.9-1.7z"/>
+<path class="map-country" id="SK" data-name="Slovakia" d="M1087.4 260.9l-4.9-2.3-3.4.8-2.4-.6-2.8 1.3-2.7-2.2-1.9.9-.3-.4h-1.5l-.6 1.1-1.1.3-.2 1.4-.9.3-.1.6-1.6.6-2.2-.1-.6 1.4-.3.8.7 2.1 2.6 1.6 1.9.7 4.1-.8.3-1.2 1.9-.2 2.3-1 .6.4 2.2-.7 1-1.5 1.6-.4 5.5 1.9 1-.6.7-2.5 1.1-1.7z"/>
+<path class="map-country" id="SL" data-name="Sierra Leone" d="M919.4 518.7l-1.5.3v-2.3l-.9-1.7.2-1.8-1.2-2.7-1.5-2.3H910l-1.3 1.2-1.5.2-1 1.4-.7 1.7-3 2.8.7 4.7.9 2.3 2.9 3.5 4.1 2.5 1.5.5 1.3-2 .3-1.9 2.6-3.4 2.6-3z"/>
+<path class="map-country" id="SN" data-name="Senegal" d="M908.9 479.2l-3.6-4.4-3.2-4.7-3.7-1.7-2.6-1.8h-3.1l-2.8 1.4-2.7-.5-2 2-1.3 3.3-2.8 4.4-2.5 1.2 2.7 2.3 2.2 5 6.1-.2 1.3-1.5 1.8-.1 2.1 1.5 1.8.1 1.8-1.1 1.1 1.8-2.4 1.5-2.4-.1-2.4-1.4-2.1 1.5h-1l-1.4.9-5-.1.8 4.9 3-1.1 1.8.2 1.5-.7 10.3.3 2.7.1 4 1.5 1.3-.1.4-.7 3 .5.8-.4.3-2-.4-2.4-2.1-1.8-1.1-3.7-.2-3.9z"/>
+<path class="map-country" id="SO" data-name="Somalia" d="M1223.4 505.7l-2.6-2.7-1.2-2.6-1.8-1.2-2 3.4-1.1 2.3 2.2 3.5 2.1 3.1 2.2 2.2 18.5 7.6 4.8-.1-15.4 19.1-7.4.3-4.9 4.5-3.6.1-1.5 2-4.8 7.2.2 23.2 3.3 5.3 1.3-1.5 1.3-3.4 6.1-7.7 5.3-4.8 8.3-6.4 5.6-5.1 6.4-8.7 4.7-7.1 4.6-9.3 3.2-8.2 2.5-7.1 1.3-6.8 1.1-2.3-.2-3.4.4-3.7-.2-1.7h-2.1l-2.6 2.2-2.9.6-2.5.9-1.8.2-3.2.2-1.9 1.1-2.8.5-4.8 1.9-6.1.8-5.2 1.6h-2.8z"/>
+<path class="map-country" id="SR" data-name="Suriname" d="M668 533.8l-4.6.5-.6 1.1-6.7-1.2-1 5.7-3.5 1.6.3 1.5-1.1 3.3 2.4 4.6 1.8.1.7 3.5 3.3 5.6 3.1.5.5-1.3-.9-1.3.5-1.8 2.3.6 2.7-.7 3.2 1.4 1.4-2.7.6-2.9 1-2.8-2.1-3.7-.4-4.4 3.1-5.5-6-1.7z"/>
+<path class="map-country" id="SS" data-name="South Sudan" d="M1166 508.7l-.7-2.2-2.9-2.5-.8-4.6.5-4.7-2.6-.5-.3 1.5-3.4.3 1.4 1.8.6 3.9-3 3.5-2.7 4.5-2.8.7-4.8-3.7-2.1 1.3-.5 1.9-2.9 1.2-.2 1.3h-5.5l-.8-1.3-4.1-.3-2 1.1-1.5-.5-3-3.7-1-1.8-4 .9-1.5 2.9-1.3 5.7-1.9 1.2-1.7.7 3.8 2.5 3.1 2.6.1 2 3.8 3.4 2.4 2.7 1.5 3.8 4.2 2.5.9 2.1 3.5 5.2 2.5.8 1.5-1.1 2.6.4 3.1-1.3 1.4 2.7 5 4.2 2.3-1.7 3.5 1.4 4.5-1.5 4 .1 3.4-3 3.4-3.8 3.8-4.2-3.5-6.9-2.6-1.5-1-2.5-2.9-3.1-3.4-.5 1.8-3.6 3-.1.8-2-.2-5-.8-.1v-3.1z"/>
+<path class="map-country" id="ST" data-name="SÃƒÂ£o TomÃƒÂ© &amp; PrÃƒÂ­ncipe" d="M1014.1 571.4l.5-.8v-.5l-.3-.5h-.4l-.5.4-.3.4v.3l.1.7.1.3.3.2.5-.5zm4.3-9.2l.2-.4v-.2l-.1-.1-.1-.1-.2.1-.3.5.1.2.2.2.2-.2z"/>
+<path class="map-country" id="SV" data-name="El Salvador" d="M487.2 487l.6-2.5-.7-.7-1.1-.5-2.5.8-.1-.9-1.6-1-1.1-1.3-1.5-.5-1.4.4.2.7-1.1.7-2.1 1.6-.2 1 1.4 1.3 3.1.4 2.2 1.3 1.9.6 3.3.1.7-1.5z"/>
+<path class="map-country" id="SX" data-name="Sint Maarten" d="M627.1 457.2l.2.2.3.1.1-.1v-.2h-.6z"/>
+<path class="map-country" id="SY" data-name="Syria" d="M1183.5 359.9l11-6.7.9-7.8-1.2-4.7 2.7-1.6 2.1-4.1-5.9 1.1-2.8-.2-5.7 2.5h-4.3l-3-1.2-5.5 1.8-1.9-1.3.1 3.6-1.2 1.5-1.2 1.4-1 2.6 1.1 5 2.4.3 1.2 2.5-2.6 2.4-.9 3.5.3 2.6-.6 1h.1l6.3 2.5 9.6-6.7z"/>
+<path class="map-country" id="SZ" data-name="Eswatini" d="M1150.5 736.6l-2.7-1.2-1.6.5-.7 1.8-1.6 2.4-.1 2.2 3 3.5 3.3-.7 1.3-2.8-.3-2.8-.6-2.9z"/>
+<path class="map-country" id="TC" data-name="Turks &amp; Caicos Islands" d="M578.7 433.1l-.1.4v.2l.2.1.6-.1.1-.1.2-.1v-.1l-.4.1-.6-.4zm3.6.6l.2-.2-.2-.2-.7-.2-.2.1v.3h.6l.3.3v-.1zm-1.1-.5l-.1-.1-.1-.6h-.5v.2l.1.2h.1l.1.2.3.2.1-.1z"/>
+<path class="map-country" id="TD" data-name="Chad" d="M1108.4 447.6l-22.4-12.2-22.3-12.2-5.4 3.5 1.6 9.9 2 1.6.2 2.1 2.3 2.2-1.1 2.7-1.8 12.9-.2 8.3-6.9 6-2.3 8.4 2.4 2.3v4.1l3.6.2-.5 2.9 2.2 4.1.5 4.2-.2 4.3 3.1 5.8-3.1-.1-1.6.4-2.5-.6-1.2 3 3.3 3.7 2.5 1.1.8 2.6 1.8 4.4-.9 1.7 4.7-.4 1-1.7.9.2 1.4 1.4 7.1-2.4 2.3-2.5 2.9-2.2-.6-2.3 1.6-.6 5.4.4 5.2-2.9 4-7 2.8-2.5 3.5-1.1v-1.6l-2.1-1.8-.1-3.7-1.2-2.5-2 .4.5-2.4 1.4-2.6-.7-2.7 1.8-1.9-1.2-1.5 1.4-3.9 2.4-4.7 4.8.4-1.1-25.2z"/>
+<path class="map-country" id="TG" data-name="Togo" d="M981.7 502.2l-4.9-.1-.4 1.9 2.4 3.3-.1 4.6.6 5.1 1.4 2.3-1.2 5.7.4 3.2 1.5 4 1.2 2.2 4.6-1.3-1.4-4.4.2-14.6-1.1-1.3-.2-3.1-2-2.3-1.7-1.9.7-3.3z"/>
+<path class="map-country" id="TH" data-name="Thailand" d="M1562.7 481.4l1.5-2.9-.5-5.4-5.2-5.5-1.3-6.3-4.9-5.2-4.3-.4-.8 2.2-3.2.2-1.8-1.2-5.3 3.8-1-5.7.4-6.7-3.8-.3-.9-3.8-2.6-1.9-3 1.4-2.8 2.8-3.9.3-1.5 6.9-2.2 1.1 3.5 5.6 4.1 4.6 2.9 4.2-1.4 5.6-1.7 1.1 1.7 3.2 4.2 5.1 1 3.5.2 3 2.8 5.8-2.6 5.9-2.2 6.6-1.3 6.1-.3 3.9 1.2 3.6.7-3.8 2.9 3.1 3.2 3.5 1.1 3.2 2.4 2.4.9-1.1 4.7 2.8.6 3.3 3.7-.8 1.7-2.6-3.1-3.3-3.4-.8-3.3-3.6-1.4-5.5-2.6-5.8-3.7-.2-.7-4.6 1.4-5.6 2.2-9.3-.2-7 4.9-.1-.3 5 4.7-.1 5.3 2.9-2.1-7.7 3-5.2 7.1-1.3 5.3 1z"/>
+<path class="map-country" id="TJ" data-name="Tajikistan" d="M1344.1 315.7l-2.1.2-1.3-1.8.2-2.9-6.4 1.5-.5 4-1.5 3.5-4.4-.3-.6 2.8 4.2 1.6 2.4 4.7-1.3 6.6 1.8.8 3.3-2.1 2.1 1.3.9-3 3.2.1.6-.9-.2-2.6 1.7-2.3 3.2 1.5v2l1.6.3 1 5.4 2.6 2.1 1.5-1.3 2.1-.7 2.5-2.9 3.8.5h5.4l-1.8-3.7-.6-2.5-3.5-1.4-1.6.6-3-5.9-9.5.9-7.1-2-5.4.5-.6-3.7 5.9 1.1 1.4-2z"/>
+<path class="map-country" id="TL" data-name="Timor-Leste" d="M1676.8 631.9l4.9-1.8 6-2.8 2.2-1.7-2-.8-1.8.8-4 .2-4.9 1.4-.8 1.5.5 1.3-.1 1.9z"/>
+<path class="map-country" id="TM" data-name="Turkmenistan" d="M1325.6 334.2l-.8-4-7.7-2.7-6.2-3.2-4.2-3-7-4.4-4.3-6.4-2-1.2-5.5.3-2.3-1.3-1.9-4.9-7.8-3.3-3.3 3.6-3.8 2.2 1.6 3.1-5.8.1-2.5.3-4.9-4.9-3.8-1.7-5.5 1.3-1.8 2 2.5 4-.5-4.5 3.7-1.6 2.4 3.6 4.6 3.7-4 2-5.3-1.5.1 5.2 3.5.4-.4 4.4 4.5 2.1.7 6.8 1.8 4.5 4.4-1.2 3-3.7 3.5.2 2.1-1.2 3.8.6 6.5 3.3 4.3.7 7.3 5.7 3.9.2 1.6 5.5 5.9 2.4 3.9-.8.4-3 4-.9 2.5-2-.1-5.2 4.1-1.2.3-2.3 2.9 1.7 1.6.2z"/>
+<path class="map-country" id="TN" data-name="Tunisia" d="M1038 361.4l-2-1-1.5-3-2.8-.1-1.1-3.5 3.4-3.2.5-5.6-1.9-1.6-.1-3 2.5-3.2-.4-1.3-4.4 2.4.1-3.3-3.7-.7-5.6 2.6-1 3.3 1 6.2-1.1 5.3-3.2 3.6.6 4.8 4.5 3.8v1.5l3.4 2.6 2.6 11.3 2.6-1.4.4-2.7-.7-2.6 3.7-2.5 1.5-2 2.6-1.8.1-4.9z"/>
+<path class="map-country" id="TO" data-name="Tonga" d="M13.3 707.7l-.2.3v.2l.4.4-.2-.9zm-1.6-.9h-.2l.2-.1-.4-.2h-.4l-.2-.1v-.2l-.2.3.2.3.9.4.3.2.2-.6v-.2l-.3.1v.1h-.1zm2.5-16l.1-.2v-.2l-.3-.1h-.1l-.3.5.1.1.3.2h.1l.1-.3z"/>
+<path class="map-country" id="TR" data-name="TÃƒÂ¼rkiye" d="M1166.6 308.9l-9.7-4.4-8.5.2-5.7 1.7-5.6 4-9.9-.8-1.6 4.8-7.9.2-5.1 6.1 3.6 3-2 5 4.2 3.6 3.7 6.4 5.8-.1 5.4 3.5 3.6-.8.9-2.7 5.7.2 4.6 3.5 8-.7 3.1-3.7 4.6 1.5 3.2-.6-1.7 2.4 2.3 3 1.2-1.4 1.2-1.5-.1-3.6 1.9 1.3 5.5-1.8 3 1.2h4.3l5.7-2.5 2.8.2 5.9-1.1 2.1-1 6.2.9 2.1 1.6 2.3-1.1-3.7-5.2.7-2-2.9-7.3 3.3-1.8-2.4-1.9-4.2-1.5v-3.1l-1.3-2.2-5.6-3-5.4.3-5.5 3.2-4.5-.6-5.8 1-7.8-2.4zm-49.6 4l2-1.9 6.1-.4.7-1.5-4.7-2-.9-2.4-4.5-.8-5 2 2.7 1.6-1.2 3.9-1.1.7.1 1.3 1.9 2.9 3.9-3.4z"/>
+<path class="map-country" id="TT" data-name="Trinidad &amp; Tobago" d="M635.4 507.7l.1-.2v-.6l.2-.4-.2-.4-.1-.6.1-.5v-.7l.2-.3.5-.8h-.9l-.6.2-1.1.1-.5.2-.7.1-.4.2.1.1.5.2.2.2.1.2.1.4-.3 1.7-.1.1-.6.1-.2.3-1.4.8.8-.1.9.1 2.4-.1.9-.3zm1.8-6.7l1.2-.5.1-.4h-.2l-.8.3-.6.5v.2l.3-.1z"/>
+<path class="map-country" id="TW" data-name="Taiwan" d="M1642.3 427.2l1.2-10.2.1-3.9-2.9-1.9-3.3 4.8-1.9 6.3 1.5 4.7 4 5.4 1.3-5.2z"/>
+<path class="map-country" id="TZ" data-name="Tanzania" d="M1149.6 578.6l-2 .8 2.3 3.6-.4 3.7-1.6.8.3 2.5 1.2 1.5v2l-1.4 1.4-2.2 3.3-2.1 2.3-.6.1-.3 2.7 1.1.9-.2 2.7 1 2.6-1.3 2.4 4.5 4.3.3 3.9 2.7 6.5.3.2 2.2 1.1 3.5 1.1 3.2 1.9 5.4 1.2 1.1 1.7.4-1.2 2.8 3.4.3 6.7 1.8 2.4v.1l2.1-.3 6.7 1.8 1.4-.8 3.9-.1 2.1-1.9 3.3.1 6.2-2.5 4.6-3.7-2-1.4-2.2-6.3-1.8-3.9.4-3.1-.3-1.9 1.7-3.9-.2-1.6-3.5-2.3-.3-3.6 2.8-7.9-8-6.3-.4-3.7-20.2-13-2.8 2.8-1.9 2.9 2.2 2.2-3.2 1.6-.7-.8-3.2.4-2.5 1.4-1.6-2.4 1.1-4.5.2-3.8-6.2-.1z"/>
+<path class="map-country" id="UA" data-name="Ukraine" d="M1138.5 241l-4.8.5-1.5-.3-1 1.4-1.8-.2-4.1.3-1.2 1.4.2 3.1-2-.6-4.3.3-1.5-1.5-1.6 1.1-2-.9-3.8-.1-5.6-1.5-5-.5-3.7.2-2.4 1.6-2.2.3 3.1 5.3-.3 1.8-2.3.7-3.8 5.1 1.6 2.8-1.1-.4-1.1 1.7-.7 2.5 2.9 1.7.6 1.6 1.9-1.3 3.2.7h3.2l2.4 1.5 1.6-.9 3.6-.6 1-1.5h2.1l1.1-.9 3.2-.6 3.9 1.9 2 .3 2.5 1.6v2.1l1.9 1.1 1.1 2.6 2 1.5-.2 1 1 .6-1.2.5-3-.2-.6-.9-1 .5.5 1.1-1.1 2-.5 2.1-1.2.7 2.4 1.1 2.2-1 2.4 1.1 3.3-4.6 1.3-3.4 4.5-.8.7 2.4 8 1.5 1.7 1.4-4.5 2.1-.7 1.2 5.8 1.8-.6 2.9 3 1.3 6.3-3.6 5.3-1.1.6-2.2-5.1.4-2.7-1.5-1-3.9 3.9-2.3 4.6-.3 3-2 3.9-.5-.4-2.8 2.2-1.7 4.7-.5.3-2.1-1.8-3.4 1.3-3.2-.4-1.9-7.6-2-2.9.1-3.6-2.9-3.5 1-6.6-2.2-.2-1.2-2.2-2.7-4-.2-.7-1.9.9-1.3-3.8-3.4z"/>
+<path class="map-country" id="UG" data-name="Uganda" d="M1167.6 545.1l-3.4 3-4-.1-4.5 1.5-3.5-1.4-2.3 1.7-.3 7.5 2.3.8-1.8 2.3-2.2 1.7-2.1 3.3-1.2 3-.3 5.1-1.3 2.4-.1 4.8 1.4.6 3.3-1.9 2-.8 6.2.1-.3-2.5 2.6-3.7 3.5-.9 2.4-1.5 2.9 1.2.3.5v-.3l1.6-2.6 2.7-4.2 2.1-4.7-2.6-7.3-.7-3.2-2.7-4.4z"/>
+<path class="map-country" id="US" data-name="United States" d="M116.7 450.7l2-.9 2.5-1.4.2-.4-.9-2.2-.7-.8-.8-.6-1.9-1.1-.4-.1-.4.6v1.3l-1.2 1-.4.7.4 2.3-.6 1.8 1.2.9 1-1.1zm-.6-9.9l.6-.7-1.2-1-1.8-.6-.7.5v.4l.5.5.6 1.4 2-.5zm-3-3.4l-2.6-.2-.6.7 2.9.2.3-.7zm-4.7-.9l-1.1-2.1-.3-.4-1.7.9.1.2.4 1.5 1.8.2.4.1.4-.4zm-8.3-4.2l.3-1.5-1.3-.1-1 .6-.4.5 1.6 1.1.8-.6zm412.1-173.2h-1.6l-1.3 2.4H373.4l-1.6 5.1-2.4 5.1-2.3 1.6 1.1-5.9-5.8-2.1-1.4 1.2-.4 2.9-1.8 5.4-4.2 8.3-4 5.6-4 5.6-5.4 5.8-1.1 4.7-2.8 5.3-3.9 5.2 1 3.4-1.9 5.2 1.5 5.4 1.3 2.2-.8 1.5.4 9 2.5 6.5-.8 3.5 1 1 4.6.7 1.3 1.7 2.8.3-.1 1.9 2.2.7 2.1 3.7-.3 3.2 6.3-.5 7-.7-1 1.3 7.1 3.1 10.7 4.4h15l.8-2.6h9.3l1.3 2.2 2.1 2 2.4 2.8.8 3.3.4 3.5 2.2 1.9 4 1.9 4.8-5 4.4-.1 3.1 2.5 1.6 4.4 1 3.7 2.4 3.6.2 4.5.8 3 3.9 2 3.6 1.4 2.1-.2-.6-2.2.4-3.1 1-4.4 1.9-2.8 3.7-3.1 6-2.7 6.1-4.7 4.9-1.5 3.5-.4 3.5 1.4 4.9-.8 3.3 3.4 3.8.2 2.4-1.2 1.7.9 1.3-.8-.9-1.3.7-2.5-.5-1.7 2.4-1 4.2-.4 4.7.7 6.2-.8 3 1.5 2 3 .9.3 6.1-2.9 1.9 1 3 5.3.8 3.5-2 4.2.4 2.5 1.6 4.9 2 5.5 1.8 1.4.4 2.8 2.6.8 1.7-.8 2-3.9.7-2.5.9-4.3-1.2-7.4.5-2.7-1.5-4.5-.7-5.4.1-4.4 1.8-4.5 3.5-3.8 3.7-3 6.9-4.1 1.3-2.2 3.3-2.3 2.8-.4 4.4-3.8 6-1.9 4.6-4.8.9-6.5.1-2.2-1.4-.4 1.5-6.2-3-2.1 3.2 1v-4.1l1.9-2.7-1 5.3 2 2.5-2.9 4.4.4.2 4.4-5.1 2.4-2.5.6-2.5-.9-1.1-.1-3.5 1.2 1.6 1.1.4-.1 1.6 5.2-4.9 2.5-4.5-1.4-.3 2.1-1.8-.4.8h3.3l7.8-1.9-1.1-1.2-7.9 1.2 4.8-1.8 3.1-.3 2.4-.3 4.1-1.1 2.4.1 3.8-1 1-1.7-1.1-1.4-.2 2.2-2.1-.1-.6-3.3 1.1-3.3 1.4-1.3 3.9-3.7 5.9-1.8 6-2.1 6.3-3-.2-2-2.1-3.5 2.8-8.5-1.5-1.8-3.7 1.1-1.1-1.7-5.5 4.7-3.2 4.9-2.7 2.8-2.5.9-1.7.3-1 1.6h-17l-2.7 1.2-6.7 4.2.2.9-.6 2.4-4.6 2-3.9-.5-4-.2-2.6.7-.3 1.8-.1.6-5.8 3.7-4.5 1.8-2.9.8-3.7 1.7-4 .9-2.5-.3-2.7-1.3 2.7-2.4 2-2.2 3.7-3.4.7-2.5.5-3.5-1.6-.7-4.3 2.8-.9-.1.3-1.5 3.8-2.5 1.6-2.8.7-2.8-2.7-2.4-3.7-1.3-1.7 2.4-1.4.6-2.2 3.1.4-2.1-2.6 1.5-2.1 2-2.6 3.1-1.3 2.6.1 3.8-1.8 4-3.3 3-1.4.9-1.6.7h-1.8l-.3-.4-.1-3.3.7-1.6.7-1.5.6-3 2.5-3.5 2.9-4.3 4.6-4.7h-.7l-5.4 4-.4-.7 2.9-2.3 4.7-4 3.7-.5 4.4-1.3 3.7.7h.1l4.7-.5-1.5-2.5-1.2-.2-1.4-.3-.4-1.7-5.1.5-5 1.4-2.5-2.3-2.5-.8 3.1-3.3-5.3 2-4.9 2.1-4.6 1.5-2.1-2.1-5.5 1.3.4-.9 4.6-2.6 4.7-2.5 5.9-2.1-5.3-1.6-4.4.8-3.8-1.9-4.6-1-3.2-.4-1-1 .8-3.4zm-240.6-46.9l6.9-2.8v-1.8l-2.6-.4-3.4.9-6.4 2.1-2.2 2.7.7 1.6 7-2.3zm-38.7-16.4l2.3-2.3-2.9-.5-5.7 1 .8 1.6 1.6 1.1 3.9-.9zm1.2-22.3l-3.1 2.2.4.5 4.2-.4.3 1.1 1.7 1.2 4.9-1.2 1.2-.6-3.3-.8-1.6-1.5-3.4.6-1.3-1.1zM359 133.3l-4.4-1.1-10.2 2.8-3.2-.3-11 2.3-4.8.6-7.8 2.5-4.8 2.6-8.6 2.5-7.6.1-6.3 2.9 3.2 1.7.7 2.3-.8 2.7 2.3 2.1-1.2 3.5-9.2.2 4.3-2.8h-3.4l-13.1 2.7-9.1 2.3 1 3.3-1.2 2.2 4.5 1.4 6.9-.7 1.8 1.3 2.9-1.3 6.1-1.2h2.7l-5.9 2.1 1.1 1-2.5 2.6-5.5 1.8-2.5-.5-7 2.7-1.8-.9-4.1.4-5.3 3-7.6 3.1-5.8 3.4.3 2.4-4 3.3 1.4 1.4.5 2.7 7.2-1.1.4 2.1-3.3 2.1-3.6 3.5h2.8l7.2-2.3-1.6 2.9 3.6-2.1-.4 3 4.8-2.2.4 1.1 7.2-1.8-6.2 3.4-5.7 4.5-5.7 2.1-2.3 1.2-10.3 3.6-4.9 2.4-6.5.7-8.5 3.3-6.6 1.8-8.1 2.8-.4 1 10-1.7 6-2 6.9-2 6.1-1.7 2.8.5 8.1-2.6 4.5-2.8 10.5-3.1 3.9-2.6 6.6-1.8 7.6-2.5 8.9-4.2-.2-2.9 11.1-4.1 7.4-3.9 9.2-3.2-.4 1.4-6.7 1.8-8.3 5.7-3.2 3.5 6.4-1.3 6.1-1.9 6.5-1.3 2.9-.3 3.5-4.1 6.3-1.2 2.6 2.5 6 2.7 6.7-.5 5.7 2 3.2 1.1 3.3 6.1 3.7 1.7 7.1.2 4.1.4-2.7 5.5 1.6 4.9-3.3 5.2 2.5 1.9.6 2.2 5.1-2.9 3.1-3.7-4.6-3.8 1.5-6.8 1.1-4.2-1.7-2.7-.7-2.4.5-3-6.4 1.9-7.6 3.3-.2-3.9-.6-2.6-2.7-1.6-4.2-.1 35.4-32.4 24.3-20.2-3.5-.7-4.1-1.6-6.5.8-2.2-.7-7.1-.5-6.2-1.6-4.8.5-4.9-.9 2-1.2-6.3-.3-3.3 1 .5-2.4z"/>
+<path class="map-country" id="UY" data-name="Uruguay" d="M692.5 787l-2.1-3.7 1.9-3-3.8-4.3-4.8-3.5-6.2-4.1-1.9.2-6.2-4.9-3.4.7-.5 5.1-.3 6.5 1.1 6.3-.9 1.4.4 4.2 3.9 3.5 3.6-.2 5.4 2.7 2.7-.6 4.2 1.2 5.3-3.5 1.6-4z"/>
+<path class="map-country" id="UZ" data-name="Uzbekistan" d="M1339.8 303.1l-2.5 1.2-5.4 4.3-.9 4.5h-1.9l-2.3-3-6.6-.2-2.6-5-2.5-.1-1.5-6.2-7.5-4.5-8.6.5-5.7.9-6.5-5.5-4.8-2.3-9.1-4.5-1.1-.5-11.9 3.6 6.2 22.8 5.8-.1-1.6-3.1 3.8-2.2 3.3-3.6 7.8 3.3 1.9 4.9 2.3 1.3 5.5-.3 2 1.2 4.3 6.4 7 4.4 4.2 3 6.2 3.2 7.7 2.7.8 4h2.9l4.3 1.4 1.3-6.6-2.4-4.7-4.2-1.6.6-2.8 4.4.3 1.5-3.5.5-4 6.4-1.5-.2 2.9 1.3 1.8 2.1-.2 4.1.6 5.2-4.5-7.1-3.3-3.2 1.6-4.6-2.3 3.1-4.1-1.8-.6z"/>
+<path class="map-country" id="VC" data-name="St. Vincent &amp; Grenadines" d="M634.5 491.4v-.1h.1v-.2h-.1v.2h-.1v.1h.1zm.7-1.9l.1-.2.1-.1-.1-.1v.1l-.2.1v.2h-.2.1l.1.1.1-.1zm.3-1.1l.3-.2.1-.6-.1-.4h-.2l-.3.1-.2.3-.1.5.4.4.1-.1z"/>
+<path class="map-country" id="VE" data-name="Venezuela" d="M642 518.9l-2.2-1.5-2.9.2-.7-5.1-4.1-3.2-4.4-.4-1.8-3 4.8-1.9-6.7.1-6.9.4-.2 1.6-3.2 1.9-4.2-.7-3.1-2.9-6 .7-5-.1-.1-2.1-3.5-3.5-3.9-.1-1.7-4.5-2.1 2 .6 3-7.1 2.6v4.8l1.6 2.2-1.5 4.6-2.4.4-1.9-5 2.7-3.7.3-3.3-1.7-2.9 3.3-.8.3-1.5-3.7 1.1-1.6 3.2-2.2 1.8-1.8 2.4-.9 4.5-1.8 3.7 2.9.5.6 2.9 1.1 1.4.4 2.5-.8 2.4.2 1.3 1.3.6 1.3 2.2 7.2-.6 3.2.8 3.8 5.5 2.3-.7 4 .3 3.2-.7 2 1.1-1.2 3.4-1.3 2.1-.5 4.6 1 4.2 1.5 1.9.2 1.5-2.9 3.1 2 1.4 1.4 2.2 1.7 6.4 3 3.4 4.4-.5 1.1-1.9 4.2-1.5 2.3-1 .7-2.7 4.1-1.8-.3-1.4-4.8-.5-.7-4 .3-4.3-2.4-1.6 1-.6 4.2.8 4.4 1.6 1.7-1.5 4-1 6.4-2.4 2.1-2.4-.7-1.8-3.7-4.8 1.6-1.8v-2.9l3.4-1.1 1.5-1.2-1.9-2.3.6-2.3 4.6-3.8z"/>
+<path class="map-country" id="VG" data-name="British Virgin Islands" d="M619.2 455.1l.3-.2-.2-.1h-.4l-.3.2.1.1h.5zm1.1-.4l.4-.4-.5.1-.2.2.1.1h.2zm.8-1.8h-.7l.1.1h.3l.3.1v-.2z"/>
+<path class="map-country" id="VI" data-name="U.S. Virgin Islands" d="M617.9 458.9l-.7.2-.1.4h1.1l.7-.3h-.6l-.4-.3zm.9-3.5l-.5-.1-.2.2.3.1.4-.2zm-1.1.1l-.2-.2-.3-.1-.4.1.5.3.4-.1z"/>
+<path class="map-country" id="VN" data-name="Vietnam" d="M1571.6 435l-5.9-1.6-3-2.6.2-3.7-5.2-1.1-3-2.4-4.1 3.4-5.3.7h-4.3l-2.7 1.5 4 5.1 3.4 5.7 6.8.1 3 5.5-3.3 1.7-1.3 2.3 7.3 3.8 5.7 7.5 4.3 5.6 4.8 4.4 2 4.5-.2 6.4 1.8 4.2.1 7.7-8.9 4.9 2.8 3.8-5.8.5-4.7 2.5 4.5 3.7-1.3 4.3 2.3 4 6.6-5.9 4.1-5.3 6.1-4.1 4.3-4.2-.4-11.2-4-11.7-4.1-5.1-5.6-4-6.4-8.3-5.3-6.7.5-4.4 3.7-6 6.5-5.5z"/>
+<path class="map-country" id="VU" data-name="Vanuatu" d="M1908.6 676.9l-2.7-3.6-.6 1.7 1.3 2.8 2-.9zm-2-9.7l-2.3-2-.9 4.9.5 1.8 1.2-.4 1.3.8.2-5.1z"/>
+<path class="map-country" id="YE" data-name="Yemen" d="M1271.5 466.2l-2.1-4.4-5.2-10.5-15.7 2.4-5 2.9-3.5 6.7-2.5 1-1.6-2.1-2.1.3-5.4-.6-1-.7-6.4.2-1.5.6-2.4-1.7-1.2 3.1.7 2.7-2.3 2.1.4 2.7-.6 1.3.7 2.9-1.1.3 1.7 2.6 1.3 4.7 1 1.9v3.4l1.6 3.8 3.9.3 1.8-.9 2.7.2.8-1.7 1.5-.4 1.1-1.7 1.4-.4 4.7-.3 3.5-1.2 3.1-2.7 1.7.4 2.4-.3 4.7-4.5 8.8-3 5.3-2.7v-2.1l.9-2.9 3.9-1.7z"/>
+<path class="map-country" id="YT" data-name="Mayotte" d="M1228.7 654.7v-.3l.2-.5v-.1l.1-.5-.3-.3h-.2l-.2-.3-.3.3.3.5-.1.3-.1.4.1.4.2.2.3-.1z"/>
+<path class="map-country" id="ZA" data-name="South Africa" d="M1148.2 713.7l-2.9-.6-1.9.8-2.6-1.1-2.2-.1-8 4.7-5.2 4.7-2 4.3-1.7 2.4-3 .5-1.2 3-.6 2-3.6 1.5-4.4-.3-2.5-1.8-2.3-.8-2.7 1.5-1.5 3.1-2.7 1.9-2.8 2.8-4 .7-1.1-2.3.7-3.8-3-6.1-1.4-1-1.1 23.6-5 3.2-2.9.5-3.3-1.2-2.4-.5-.8-2.7-2.1-1.8-2.7 3.2 3.5 8.2v.1l2.5 5.3 3.2 6-.2 4.8-1.7 1.2 1.4 4.2-.2 3.8.6 1.7.3-.9 2.1 2.9 1.8.1 2.1 2.3 2.4-.2 3.5-2.4 4.6-1 5.6-2.5 2.2.3 3.3-.8 5.7 1.2 2.7-1.2 3.2 1 .8-1.8 2.7-.3 5.8-2.5 4.3-2.9 4.1-3.8 6.7-6.5 3.4-4.6 1.8-3.2 2.5-3.3 1.2-.9 3.9-3.2 1.6-2.9 1.1-5.2 1.7-4.7h-4.1l-1.3 2.8-3.3.7-3-3.5.1-2.2 1.6-2.4.7-1.8 1.6-.5 2.7 1.2-.4-2.3 1.4-7.1-1.1-4.5-2.2-9zm-20.1 52.8l-2 .6-3.7-4.9 3.2-4 3.1-2.5 2.6-1.3 2.3 2 1.7 1.9-1.9 3.1-1.1 2.1-3.1 1-1.1 2z"/>
+<path class="map-country" id="ZM" data-name="Zambia" d="M1149.2 626.7l-1.9-.5.4-1.3-1-.3-7.5 1.1-1.6.7-1.6 4.1 1.2 2.8-1.2 7.5-.8 6.4 1.4 1.1 3.9 2.5 1.5-1.2.3 6.9h-4.3l-2.1-3.5-2-2.8-4.3-.8-1.2-3.4-3.4 2-4.5-.9-1.8-2.8-3.5-.6-2.6.1-.3-2-1.9-.1.5 2-.7 3 .9 3-.9 2.4.5 2.2-11.6-.1-.8 20.3 3.6 5.2 3.5 4 4.6-1.5 3.6.4 2.1 1.4v.5l1 .5 6.2.7 1.7.7 1.9-.1 3.2-4.1 5.1-5.3 2-.5.7-2.2 3.3-2.5 4.2-.9-.3-4.5 17.1-5.2-2.9-1.7 1.9-5.9 1.8-2.2-.9-5.3 1.2-5.1 1-1.8-1.2-5.4-2.6-2.8-3.2-1.9-3.5-1.1-2.2-1.1-.3-.2.5 1.1-1 .4-1.2-1.4z"/>
+<path class="map-country" id="ZW" data-name="Zimbabwe" d="M1148.2 713.7l6.2-7.2 1.6-4.6.9-.6.8-3.7-.8-1.9.5-4.7 1.3-4.4.3-8.1-2.8-2-2.6-.5-1.1-1.6-2.6-1.3-4.6.1-.3-2.4-4.2.9-3.3 2.5-.7 2.2-2 .5-5.1 5.3-3.2 4.1-1.9.1-1.7-.7-6.2-.7 1.9 5.1 1.1 1.1 1.6 3.7 6 7 2.3.7-.1 2.2 1.5 4.1 4.2.9 3.4 2.9 2.2.1 2.6 1.1 1.9-.8 2.9.6z"/>
+                                </g>
+                                <g id="radarBeaconsGroup" style="display:none;">
+                                    <!-- India Beacon -->
+                                    <g class="radar-beacon" transform="translate(1414, 380)">
+                                        <circle class="radar-beacon-ping" r="6" fill="#00f2fe" opacity="0.85"></circle>
+                                        <circle r="7" fill="#00f2fe" stroke="#ffffff" stroke-width="2"></circle>
+                                    </g>
+                                    <!-- USA Beacon -->
+                                    <g class="radar-beacon" transform="translate(480, 290)">
+                                        <circle class="radar-beacon-ping" r="6" fill="#00f2fe" opacity="0.85" style="animation-delay:0.4s;"></circle>
+                                        <circle r="6" fill="#00f2fe" stroke="#ffffff" stroke-width="2"></circle>
+                                    </g>
+                                    <!-- UK Beacon -->
+                                    <g class="radar-beacon" transform="translate(980, 205)">
+                                        <circle class="radar-beacon-ping" r="6" fill="#00f2fe" opacity="0.85" style="animation-delay:0.8s;"></circle>
+                                        <circle r="5" fill="#00f2fe" stroke="#ffffff" stroke-width="1.8"></circle>
+                                    </g>
+                                    <!-- Brazil Beacon -->
+                                    <g class="radar-beacon" transform="translate(710, 580)">
+                                        <circle class="radar-beacon-ping" r="6" fill="#00f2fe" opacity="0.85" style="animation-delay:1.2s;"></circle>
+                                        <circle r="5.5" fill="#00f2fe" stroke="#ffffff" stroke-width="1.8"></circle>
+                                    </g>
+                                    <!-- Australia Beacon -->
+                                    <g class="radar-beacon" transform="translate(1740, 640)">
+                                        <circle class="radar-beacon-ping" r="6" fill="#00f2fe" opacity="0.85" style="animation-delay:1.6s;"></circle>
+                                        <circle r="5.5" fill="#00f2fe" stroke="#ffffff" stroke-width="1.8"></circle>
+                                    </g>
+                                </g>
+                            </svg>
+                        </div>
+
+                        <!-- Top Audience Regions Chips -->
+                        <div id="mapTopRegions" class="map-top-regions">
+                            <span class="region-chip">🇮🇳 India <strong id="mapPctIN">0%</strong></span>
+                            <span class="region-chip">🇺🇸 USA <strong id="mapPctUS">0%</strong></span>
+                            <span class="region-chip">🇬🇧 UK <strong id="mapPctGB">0%</strong></span>
+                            <span class="region-chip">🇧🇷 Brazil <strong id="mapPctBR">0%</strong></span>
+                            <span class="region-chip">🇦🇺 Australia <strong id="mapPctAU">0%</strong></span>
+                        </div>
+
+                        <div class="map-legend">
+                            <span><span class="map-legend-dot" style="background:#0ea5e9; box-shadow:0 0 5px rgba(14,165,233,0.5);"></span>Followers</span>
+                            <span><span class="map-legend-dot" style="background:#94a3b8;"></span>Non-followers</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TIER 3: Conversion Rate (Funnel) + Best time to post (Heatmap) -->
+                <div class="grid-performance-bot">
+                    <!-- Conversion Rate Funnel -->
+                    <div class="card">
+                        <div class="chart-header" style="margin-bottom:12px;">
+                            <div class="chart-title">Conversion Rate</div>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--text-muted); cursor:pointer;"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>
+                        </div>
+
+                        <!-- Funnel Stats Banner -->
+                        <div class="conversion-stats-grid">
+                            <div class="conv-stat-item">
+                                <span class="conv-stat-val" id="convImpressions">0</span>
+                                <span class="conv-stat-lbl">Impressions</span>
+                            </div>
+                            <div class="conv-stat-item">
+                                <span class="conv-stat-val" id="convClicks">0</span>
+                                <span class="conv-stat-lbl">Clicks</span>
+                            </div>
+                            <div class="conv-stat-item">
+                                <span class="conv-stat-val" id="convEngagement">0</span>
+                                <span class="conv-stat-lbl">Engagement</span>
+                            </div>
+                            <div class="conv-stat-item">
+                                <span class="conv-stat-val" id="convConversions" style="color:#00f2fe;">0</span>
+                                <span class="conv-stat-lbl">Conversions</span>
+                            </div>
+                        </div>
+
+                        <!-- Stepped Funnel Area Canvas -->
+                        <div class="chart-canvas-container" style="height:190px;">
+                            <canvas id="conversionFunnelChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Best Time to Post Heatmap Matrix -->
+                    <div class="card" style="display:flex; flex-direction:column; justify-content:space-between;">
+                        <div class="chart-header" style="margin-bottom:6px;">
+                            <div class="chart-title">Best time to post</div>
+                        </div>
+
+                        <div style="overflow-x:auto;">
+                            <table class="heatmap-table">
+                                <thead>
+                                    <tr>
+                                        <th style="text-align:left;"></th>
+                                        <th>8a - 11a</th>
+                                        <th>11a - 2p</th>
+                                        <th>2p - 5p</th>
+                                        <th>5p - 8p</th>
+                                        <th>8p - 11p</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="heatmap-day-lbl">Sun</td>
+                                        <td><span class="heat-dot heat-lvl-0" title="Sun 8a-11a: Low activity"></span></td>
+                                        <td><span class="heat-dot heat-lvl-1" title="Sun 11a-2p: Moderate activity"></span></td>
+                                        <td><span class="heat-dot heat-lvl-2" title="Sun 2p-5p: Active"></span></td>
+                                        <td><span class="heat-dot heat-lvl-3" title="Sun 5p-8p: High response"></span></td>
+                                        <td><span class="heat-dot heat-lvl-2" title="Sun 8p-11p: Active"></span></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="heatmap-day-lbl">Mon</td>
+                                        <td><span class="heat-dot heat-lvl-1" title="Mon 8a-11a: Moderate activity"></span></td>
+                                        <td><span class="heat-dot heat-lvl-3" title="Mon 11a-2p: High response"></span></td>
+                                        <td><span class="heat-dot heat-lvl-2" title="Mon 2p-5p: Active"></span></td>
+                                        <td><span class="heat-dot heat-lvl-4" title="Mon 5p-8p: Very high response"></span></td>
+                                        <td><span class="heat-dot heat-lvl-3" title="Mon 8p-11p: High response"></span></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="heatmap-day-lbl">Tue</td>
+                                        <td><span class="heat-dot heat-lvl-1" title="Tue 8a-11a: Moderate activity"></span></td>
+                                        <td><span class="heat-dot heat-lvl-2" title="Tue 11a-2p: Active"></span></td>
+                                        <td><span class="heat-dot heat-lvl-2" title="Tue 2p-5p: Active"></span></td>
+                                        <td><span class="heat-dot heat-lvl-3" title="Tue 5p-8p: High response"></span></td>
+                                        <td><span class="heat-dot heat-lvl-2" title="Tue 8p-11p: Active"></span></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="heatmap-day-lbl">Wed</td>
+                                        <td><span class="heat-dot heat-lvl-best" title="Wed 8a-11a: Optimal peak window (+42% reach)"></span></td>
+                                        <td><span class="heat-dot heat-lvl-3" title="Wed 11a-2p: High response"></span></td>
+                                        <td><span class="heat-dot heat-lvl-2" title="Wed 2p-5p: Active"></span></td>
+                                        <td><span class="heat-dot heat-lvl-4" title="Wed 5p-8p: Very high response"></span></td>
+                                        <td><span class="heat-dot heat-lvl-3" title="Wed 8p-11p: High response"></span></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="heatmap-day-lbl">Thurs</td>
+                                        <td><span class="heat-dot heat-lvl-3" title="Thurs 8a-11a: High response"></span></td>
+                                        <td><span class="heat-dot heat-lvl-2" title="Thurs 11a-2p: Active"></span></td>
+                                        <td><span class="heat-dot heat-lvl-4" title="Thurs 2p-5p: Very high response"></span></td>
+                                        <td><span class="heat-dot heat-lvl-3" title="Thurs 5p-8p: High response"></span></td>
+                                        <td><span class="heat-dot heat-lvl-4" title="Thurs 8p-11p: Very high response"></span></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="heatmap-day-lbl">Fri</td>
+                                        <td><span class="heat-dot heat-lvl-4" title="Fri 8a-11a: Very high response"></span></td>
+                                        <td><span class="heat-dot heat-lvl-1" title="Fri 11a-2p: Moderate activity"></span></td>
+                                        <td><span class="heat-dot heat-lvl-1" title="Fri 2p-5p: Moderate activity"></span></td>
+                                        <td><span class="heat-dot heat-lvl-4" title="Fri 5p-8p: Very high response"></span></td>
+                                        <td><span class="heat-dot heat-lvl-2" title="Fri 8p-11p: Active"></span></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="heatmap-day-lbl">Sat</td>
+                                        <td><span class="heat-dot heat-lvl-0" title="Sat 8a-11a: Low activity"></span></td>
+                                        <td><span class="heat-dot heat-lvl-2" title="Sat 11a-2p: Active"></span></td>
+                                        <td><span class="heat-dot heat-lvl-2" title="Sat 2p-5p: Active"></span></td>
+                                        <td><span class="heat-dot heat-lvl-1" title="Sat 5p-8p: Moderate activity"></span></td>
+                                        <td><span class="heat-dot heat-lvl-0" title="Sat 8p-11p: Low activity"></span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Heatmap Legend -->
+                        <div class="heatmap-footer-legend">
+                            <span style="font-size:11px; color:var(--text-secondary);">Best</span>
+                            <span class="heat-dot heat-lvl-4" style="width:10px; height:10px;"></span>
+                            <span class="heat-dot heat-lvl-3" style="width:10px; height:10px;"></span>
+                            <span class="heat-dot heat-lvl-2" style="width:10px; height:10px;"></span>
+                            <span class="heat-dot heat-lvl-1" style="width:10px; height:10px;"></span>
+                            <span class="heat-dot heat-lvl-0" style="width:10px; height:10px;"></span>
+                            <span style="font-size:11px; color:var(--text-secondary);">least</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TIER 4: Top Performing Post Spotlight & Channel Telemetry Table -->
+                <div style="display:grid; grid-template-columns: 1.8fr 1.2fr; gap:20px;" class="split-row">
+                    <!-- Connected Channel Telemetry Table -->
+                    <div class="card">
+                        <div class="chart-header">
+                            <div>
+                                <div class="chart-title">Connected Channel Telemetry Breakdown</div>
+                                <div class="chart-subtitle">Follower counts, interactions, and verified audience shares</div>
+                            </div>
+                            <a href="social-accounts.html" class="btn btn-outline btn-sm" style="font-size:11px; padding:3px 10px;">Manage Channels</a>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Channel / Network</th>
+                                        <th>Subscribers</th>
+                                        <th>Interactions</th>
+                                        <th>Eng. Rate</th>
+                                        <th>Audience Share</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="platformTableBody">
+                                    <tr><td colspan="5" style="text-align:center; padding:20px; color:#94a3b8;">Loading platform telemetry...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Highlighted Top Performing Post -->
+                    <div class="card">
+                        <div class="chart-header">
+                            <div>
+                                <div class="chart-title">Top Performing Post</div>
+                                <div class="chart-subtitle">Highest engagement rate this period</div>
+                            </div>
+                        </div>
+                        <div id="bestPostContainer" style="color:var(--text-secondary); font-size:13px;">
+                            <div style="text-align:center; padding:30px;">Analyzing top posts...</div>
+                        </div>
+                    </div>
+                </div>
+
+            </main>
+        </div>
+    </div>
+
+    <!-- Map Hover Tooltip -->
+    <div id="mapHoverTooltip"></div>
+
+    <!-- Scripts -->
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/navbar.js?v=4"></script>
+    <script src="js/dashboard.js?v=4"></script>
+</body>
+</html>

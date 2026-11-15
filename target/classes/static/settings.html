@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account Settings & Security — SPEDO</title>
+    <link rel="stylesheet" href="css/styles.css?v=2">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <div class="app-layout">
+        <aside class="app-sidebar" id="sidebar"></aside>
+
+        <div class="app-main">
+            <header class="app-header" id="header"></header>
+
+            <main class="page-content">
+                <div class="page-title-bar">
+                    <div class="page-heading">
+                        <h1>Account Settings & Security</h1>
+                        <p>Manage your profile, change authentication password, and inspect platform integrations.</p>
+                    </div>
+                </div>
+
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:24px; max-width:1000px;" class="settings-grid">
+                    <!-- User Profile Card -->
+                    <div class="card">
+                        <div class="chart-header">
+                            <div>
+                                <div class="chart-title">Profile Information</div>
+                                <div class="chart-subtitle">Your registered tenant identity</div>
+                            </div>
+                        </div>
+
+                        <div style="display:flex; flex-direction:column; gap:16px;">
+                            <div class="form-group">
+                                <label class="form-label">Full Name</label>
+                                <input type="text" id="profileFullName" class="form-control" readonly style="background:#f8fafc;">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Work Email</label>
+                                <input type="email" id="profileEmail" class="form-control" readonly style="background:#f8fafc;">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Company / Organization</label>
+                                <input type="text" id="profileOrg" class="form-control" readonly style="background:#f8fafc;">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">System Role</label>
+                                <input type="text" id="profileRole" class="form-control" readonly style="background:#f8fafc;">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Change Password Card -->
+                    <div class="card">
+                        <div class="chart-header">
+                            <div>
+                                <div class="chart-title">Change Password</div>
+                                <div class="chart-subtitle">Update your BCrypt-hashed credentials</div>
+                            </div>
+                        </div>
+
+                        <form id="changePasswordForm" onsubmit="handleChangePassword(event)">
+                            <div class="form-group">
+                                <label class="form-label" for="currentPassword">Current Password</label>
+                                <input type="password" id="currentPassword" class="form-control" placeholder="••••••••" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="newPassword">New Password (6+ characters)</label>
+                                <input type="password" id="newPassword" class="form-control" placeholder="••••••••" minlength="6" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="confirmPassword">Confirm New Password</label>
+                                <input type="password" id="confirmPassword" class="form-control" placeholder="••••••••" minlength="6" required>
+                            </div>
+
+                            <button type="submit" id="savePasswordBtn" class="btn btn-primary" style="width:100%; margin-top:8px;">
+                                Update Password
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Platform Adapters & Environment Credentials Info -->
+                    <div class="card" style="grid-column: 1 / -1;">
+                        <div class="chart-header">
+                            <div>
+                                <div class="chart-title">Social Platform Adapter Configuration</div>
+                                <div class="chart-subtitle">Enterprise API credentials and secret management guidelines</div>
+                            </div>
+                        </div>
+
+                        <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:18px; font-size:13px; line-height:1.6; color:#475569;">
+                            <p style="margin-bottom:12px;">
+                                🔒 <strong>Zero Secret Exposure Architecture:</strong> To protect third-party access tokens and API secrets, keys are never stored in browser memory or frontend bundles. All live integrations operate through backend environment variables:
+                            </p>
+                            <ul style="margin-left:20px; margin-bottom:14px; display:flex; flex-direction:column; gap:6px;">
+                                <li><code>APP_INTEGRATIONS_INSTAGRAM_CLIENT_ID</code> & <code>APP_INTEGRATIONS_INSTAGRAM_CLIENT_SECRET</code> (Instagram Graph API)</li>
+                                <li><code>APP_INTEGRATIONS_FACEBOOK_APP_ID</code> & <code>APP_INTEGRATIONS_FACEBOOK_APP_SECRET</code> (Meta Graph API)</li>
+                                <li><code>APP_INTEGRATIONS_YOUTUBE_API_KEY</code> (Google YouTube Data API v3)</li>
+                                <li><code>APP_INTEGRATIONS_LINKEDIN_CLIENT_ID</code> & <code>APP_INTEGRATIONS_LINKEDIN_CLIENT_SECRET</code> (LinkedIn Marketing Developer API)</li>
+                                <li><code>APP_INTEGRATIONS_TWITTER_BEARER_TOKEN</code> (X API v2)</li>
+                            </ul>
+                            <p>
+                                When platform environment keys are absent, SPEDO automatically switches into labeled <strong>Demo Mode</strong>, simulating full benchmark analytics and allowing risk-free evaluation.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/navbar.js?v=2"></script>
+    <script src="js/settings.js"></script>
+</body>
+</html>

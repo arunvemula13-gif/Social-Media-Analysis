@@ -1,0 +1,13 @@
+.git
+.github
+.vscode
+.gemini
+brain
+data/
+target/
+unslop/
+node_modules/
+*.log
+*.tmp
+.env
+.env.local

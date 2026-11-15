@@ -1,0 +1,51 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "🚀 Run SPEDO Server",
+            "type": "shell",
+            "command": "java -jar target/spedo-analytics-1.0.0.jar",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "reveal": "always",
+                "panel": "new"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "📦 Build SPEDO (Maven Package)",
+            "type": "shell",
+            "command": "cmd.exe /c mvnw.cmd clean package -DskipTests",
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "new"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "🌐 Open SPEDO in Browser",
+            "type": "shell",
+            "command": "cmd.exe /c start http://localhost:8080",
+            "group": "test",
+            "problemMatcher": []
+        },
+        {
+            "label": "🔑 Open Sign In Page (Port 8080)",
+            "type": "shell",
+            "command": "cmd.exe /c start http://localhost:8080/login.html",
+            "group": "test",
+            "problemMatcher": []
+        },
+        {
+            "label": "📝 Open Sign Up Page (Port 8080)",
+            "type": "shell",
+            "command": "cmd.exe /c start http://localhost:8080/register.html",
+            "group": "test",
+            "problemMatcher": []
+        }
+    ]
+}

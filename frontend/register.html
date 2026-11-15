@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Free Account — SPEDO Analytics</title>
+    <link rel="stylesheet" href="css/styles.css?v=2">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <div class="auth-wrapper">
+        <div class="auth-box">
+            <div class="auth-header">
+                <a href="index.html" class="brand-logo">
+                    <div class="brand-icon">S</div>
+                    <span style="color:var(--text-dark);">SPEDO</span>
+                </a>
+                <h2>Start your 14-day trial</h2>
+                <p>No credit card required. Benchmarking in minutes.</p>
+            </div>
+
+            <div id="authAlert" style="display:none; padding:12px 14px; border-radius:8px; font-size:13px; margin-bottom:16px;"></div>
+
+            <form id="registerForm" onsubmit="handleRegisterSubmit(event)">
+                <div class="form-group">
+                    <label class="form-label" for="fullName">Full Name</label>
+                    <input type="text" id="fullName" class="form-control" placeholder="Alex Morgan" required autocomplete="name">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="email">Work Email</label>
+                    <input type="email" id="email" class="form-control" placeholder="alex@company.com" required autocomplete="email">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="organization">Company / Organization</label>
+                    <input type="text" id="organization" class="form-control" placeholder="Acme Media Corp" autocomplete="organization">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="password">Password (6+ characters)</label>
+                    <input type="password" id="password" class="form-control" placeholder="••••••••" minlength="6" required autocomplete="new-password">
+                </div>
+
+                <button type="submit" id="submitBtn" class="btn btn-primary" style="width:100%; margin-top:8px;">
+                    <span>Create Free Account</span>
+                </button>
+            </form>
+
+            <div style="margin-top:24px; text-align:center; font-size:13px; color:var(--text-secondary);">
+                Already have an account? <a href="login.html" style="font-weight:600;">Sign in here</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script>
+        async function handleRegisterSubmit(e) {
+            e.preventDefault();
+            const alertBox = document.getElementById('authAlert');
+            alertBox.style.display = 'none';
+
+            const fullName = document.getElementById('fullName').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const organization = document.getElementById('organization').value.trim();
+            const password = document.getElementById('password').value;
+            const btn = document.getElementById('submitBtn');
+
+            btn.disabled = true;
+            btn.innerHTML = '<span>Creating your workspace...</span>';
+
+            try {
+                await Auth.register(fullName, email, password, organization);
+                alertBox.style.display = 'block';
+                alertBox.style.background = '#f0fdf4';
+                alertBox.style.color = '#166534';
+                alertBox.style.border = '1px solid #86efac';
+                alertBox.innerText = 'Account registered successfully! Redirecting to dashboard...';
+            } catch (err) {
+                btn.disabled = false;
+                btn.innerHTML = '<span>Create Free Account</span>';
+                alertBox.style.display = 'block';
+                alertBox.style.background = '#fef2f2';
+                alertBox.style.color = '#991b1b';
+                alertBox.style.border = '1px solid #f87171';
+                alertBox.innerText = err.message || 'Registration failed. Please try again.';
+            }
+        }
+    </script>
+</body>
+</html>

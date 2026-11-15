@@ -1,0 +1,6 @@
+com\spedo\analytics\controller\DashboardControllerIntegrationTest.class
+com\spedo\analytics\service\AuthServiceTest.class
+com\spedo\analytics\service\PostServiceTest.class
+com\spedo\analytics\integration\YouTubeAdapterTest.class
+com\spedo\analytics\controller\AuthControllerIntegrationTest.class
+com\spedo\analytics\service\CompetitorServiceTest.class
