@@ -19,6 +19,8 @@ import com.spedo.analytics.repository.PostRepository;
 import com.spedo.analytics.repository.SocialAccountRepository;
 import com.spedo.analytics.repository.SocialMetricRepository;
 import com.spedo.analytics.repository.UserRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,6 +30,8 @@ import java.util.Random;
 
 @Service
 public class SocialAccountService {
+
+    private static final Logger log = LoggerFactory.getLogger(SocialAccountService.class);
 
     private final SocialAccountRepository socialAccountRepository;
     private final SocialMetricRepository socialMetricRepository;
@@ -123,7 +127,13 @@ public class SocialAccountService {
 
         // Run initial metric sync through platform adapter
         SocialPlatformAdapter adapter = adapterFactory.getAdapter(request.getPlatform());
-        SyncResult syncResult = adapter.syncMetrics(savedAccount);
+        SyncResult syncResult;
+        try {
+            syncResult = adapter.syncMetrics(savedAccount);
+        } catch (Exception e) {
+            log.warn("Initial sync failed for account {} ({}): {}", savedAccount.getId(), savedAccount.getHandle(), e.getMessage());
+            syncResult = SyncResult.failed("Initial sync pending: " + e.getMessage(), savedAccount.getFollowerCount());
+        }
         if (syncResult.isSuccess()) {
             savedAccount.setFollowerCount(syncResult.getCurrentFollowers());
             savedAccount.setStatus(AccountStatus.SYNCED);
@@ -154,7 +164,13 @@ public class SocialAccountService {
                 .orElseThrow(() -> new ResourceNotFoundException("Social account not found"));
 
         SocialPlatformAdapter adapter = adapterFactory.getAdapter(account.getPlatform());
-        SyncResult syncResult = adapter.syncMetrics(account);
+        SyncResult syncResult;
+        try {
+            syncResult = adapter.syncMetrics(account);
+        } catch (Exception e) {
+            log.warn("Platform adapter sync failed for account {} ({}): {}", account.getId(), account.getHandle(), e.getMessage());
+            syncResult = SyncResult.failed("Sync warning: " + e.getMessage(), account.getFollowerCount());
+        }
 
         account.setFollowerCount(syncResult.getCurrentFollowers());
         account.setLastSyncedAt(LocalDateTime.now());

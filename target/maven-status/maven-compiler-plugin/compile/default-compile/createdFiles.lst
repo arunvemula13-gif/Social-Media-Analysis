@@ -33,6 +33,7 @@ com\spedo\analytics\entity\ReportStatus.class
 com\spedo\analytics\dto\DashboardSummaryDto.class
 com\spedo\analytics\dto\ChangePasswordRequest.class
 com\spedo\analytics\dto\SocialAccountDto.class
+com\spedo\analytics\dto\ForgotPasswordRequest.class
 com\spedo\analytics\repository\GiveawayWinnerRepository.class
 com\spedo\analytics\security\JwtAuthenticationFilter.class
 com\spedo\analytics\integration\SyncResult.class
@@ -47,6 +48,7 @@ com\spedo\analytics\repository\NotificationRepository.class
 com\spedo\analytics\entity\CompetitorMetric.class
 com\spedo\analytics\dto\GiveawayWinnerDto.class
 com\spedo\analytics\dto\DrawGiveawayRequest.class
+com\spedo\analytics\dto\ResetPasswordRequest.class
 com\spedo\analytics\dto\FetchGiveawayParticipantsRequest.class
 com\spedo\analytics\config\WebMvcConfig.class
 com\spedo\analytics\entity\PostComment.class

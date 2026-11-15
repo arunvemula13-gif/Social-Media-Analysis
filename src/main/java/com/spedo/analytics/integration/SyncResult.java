@@ -22,6 +22,10 @@ public class SyncResult {
         this.followerGrowth = followerGrowth;
     }
 
+    public static SyncResult failed(String message, int currentFollowers) {
+        return new SyncResult(false, message, currentFollowers, 0);
+    }
+
     public boolean isSuccess() {
         return success;
     }

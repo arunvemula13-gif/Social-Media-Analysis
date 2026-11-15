@@ -1,3 +1,18 @@
 .env
 .env.*
 !.env.example
+
+# Build target
+target/
+*.class
+
+# Database locks and traces
+data/*.lock.db
+data/*.trace.db
+*.lock.db
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

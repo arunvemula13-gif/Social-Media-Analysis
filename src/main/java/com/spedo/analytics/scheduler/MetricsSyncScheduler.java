@@ -30,14 +30,18 @@ public class MetricsSyncScheduler {
     @Scheduled(cron = "${app.scheduling.sync-cron:0 0 * * * *}")
     public void syncAllActiveAccounts() {
         log.info("Starting automated hourly social account metric synchronization...");
-        List<SocialAccount> accounts = socialAccountRepository.findAll();
-        for (SocialAccount account : accounts) {
-            try {
-                socialAccountService.syncAccount(account.getUser().getId(), account.getId());
-            } catch (Exception e) {
-                log.error("Failed to sync account id: {} (handle: {})", account.getId(), account.getHandle(), e);
+        try {
+            List<SocialAccount> accounts = socialAccountRepository.findAllWithUser();
+            for (SocialAccount account : accounts) {
+                try {
+                    socialAccountService.syncAccount(account.getUser().getId(), account.getId());
+                } catch (Throwable e) {
+                    log.error("Failed to sync account id: {} (handle: {}): {}", account.getId(), account.getHandle(), e.getMessage());
+                }
             }
+            log.info("Automated social account metric synchronization completed for {} accounts.", accounts.size());
+        } catch (Throwable t) {
+            log.error("Error during scheduled metrics synchronization: {}", t.getMessage(), t);
         }
-        log.info("Automated social account metric synchronization completed for {} accounts.", accounts.size());
     }
 }
